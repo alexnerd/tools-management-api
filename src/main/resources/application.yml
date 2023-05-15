@@ -1,0 +1,11 @@
+server:
+  servlet:
+    context-path: /tools-management-api
+
+spring:
+  jpa.open-in-view: false
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver

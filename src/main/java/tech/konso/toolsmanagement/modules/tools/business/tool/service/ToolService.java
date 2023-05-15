@@ -1,0 +1,182 @@
+package tech.konso.toolsmanagement.modules.tools.business.tool.service;
+
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import tech.konso.toolsmanagement.modules.tools.business.brand.service.BrandService;
+import tech.konso.toolsmanagement.modules.tools.business.category.service.CategoryService;
+import tech.konso.toolsmanagement.modules.tools.business.label.service.LabelService;
+import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.ToolFilterInfo;
+import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.ToolFilterResponse;
+import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.ToolInfo;
+import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.ToolRequest;
+import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.Tool;
+import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.repository.ToolRepository;
+import tech.konso.toolsmanagement.modules.tools.business.tool.service.mappers.ToolsDtoMapper;
+import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
+import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+
+import java.util.UUID;
+
+import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+
+/**
+ * Service layer for working with tools.
+ */
+@Service
+public class ToolService {
+
+    @Autowired
+    private BrandService brandService;
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private LabelService labelService;
+
+    @Autowired
+    private ToolRepository repository;
+
+    private ToolsDtoMapper toolsDtoMapper;
+
+    @PostConstruct
+    public void init() {
+        toolsDtoMapper = new ToolsDtoMapper();
+    }
+
+    /**
+     * Finds tool by id.
+     * <p>
+     * Example:
+     * <pre>
+     *     Tool tool = findById(2L);
+     * </pre>
+     *
+     * @param id of tool, must exist in database
+     * @return tool from database
+     * @throws BPException if tool not exists in database
+     */
+    public ToolInfo findById(Long id) {
+        return repository.findById(id).map(toolsDtoMapper::mapToToolInfo).orElseThrow(() -> new BPException("Tool not found id: " + id));
+    }
+
+    /**
+     * Finds all tools by specification and returns it in pageable format.
+     * By default, result set sorts by create date from newer to older and without archived tools.
+     * <p>
+     * Example:
+     * <pre>
+     *     Specification&lt;Tool> spec = specBuilder(sortSpec("name,desc")).build();
+     *     ToolFilterResponse foundedTools = service.findAll(0, 100, spec);
+     * </pre>
+     *
+     * @param page number of returned result set
+     * @param size of the returned page
+     * @param spec set of tool specification
+     * @return {@link ToolFilterResponse} object for resulting dataset in pageable format
+     * @see tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification tool specifications
+     */
+    public Page<ToolFilterInfo> findAll(int page, int size, Specification<Tool> spec) {
+        AbstractSpecification.SpecBuilder<Tool> builder = specBuilder(Tool.class);
+        Pageable pageable = PageRequest.of(page, size);
+        return repository.findAll(builder.and(spec).build(), pageable).map(toolsDtoMapper::mapToToolFilterInfo);
+    }
+
+    /**
+     * Update tool by id.
+     * Run under transaction.
+     * <p>
+     * Example:
+     * <pre>
+     *     ToolRequest rq = new ToolRequest("new_tool", null, null, true);
+     *     service.update(toolId, rq);
+     * </pre>
+     *
+     * @param id of tool, must exist in database
+     * @param rq {@link ToolRequest} object for updating tool
+     * @return {@link Tool} updated tool object
+     * @throws BPException if tool not exists in database
+     */
+    @Transactional
+    public Tool update(Long id, ToolRequest rq) {
+        Tool tool = repository.findById(id).orElseThrow(() -> new BPException("Tool not found id: " + id));
+        updateToolFromRequest(rq, tool);
+        return tool;
+    }
+
+    /**
+     * Save new tool.
+     * Run under transaction.
+     * <p>
+     * Example:
+     * <pre>
+     *     ToolRequest rq = new ToolRequest("new_tool", null, null, false);
+     *     Tool savedTool = service.save(rq);
+     * </pre>
+     *
+     * @param rq {@link ToolRequest} object for creating tool
+     * @return {@link Tool} saved object
+     */
+    @Transactional
+    public Tool save(ToolRequest rq) {
+        Tool tool = new Tool();
+        tool.setUuid(UUID.randomUUID());
+        tool.setName(rq.name());
+        tool.setIsConsumable(rq.isConsumable());
+        tool.setInventoryNumber(rq.inventoryNumber());
+        tool.setResponsibleUuid(rq.responsibleUuid());
+        tool.setProjectUuid(rq.projectUuid());
+        tool.setPrice(rq.price());
+        tool.setOwnershipType(rq.ownershipType());
+        tool.setRentTill(rq.rentTill());
+        tool.setIsKit(rq.isKit());
+        tool.setKitUuid(rq.kitUuid());
+        tool.setBrand(rq.brandId() == null ? null : brandService.getReference(rq.brandId()));
+        tool.setCategory(rq.categoryId() == null ? null : categoryService.getReference(rq.categoryId()));
+
+        tool.removeLabels();
+        rq.labels().stream().map(labelId -> labelService.getReference(labelId)).forEach(tool::addLabel);
+
+        tool.setIsArchived(rq.isArchived());
+        return repository.save(tool);
+    }
+
+    /**
+     * Update tool object by request
+     * <p>
+     * Example:
+     * <pre>
+     *     updateToolFromRequest(rq, tool);
+     * </pre>
+     *
+     * @param rq {@link ToolRequest} object for creating tool
+     * @param tool {@link Tool} tool object for updating or creating
+     * @see ToolService#save(ToolRequest)
+     * @see ToolService#update(Long, ToolRequest)
+     */
+    private void updateToolFromRequest(ToolRequest rq, Tool tool) {
+        tool.setName(rq.name());
+        tool.setIsConsumable(rq.isConsumable());
+        tool.setInventoryNumber(rq.inventoryNumber());
+        tool.setResponsibleUuid(rq.responsibleUuid());
+        tool.setProjectUuid(rq.projectUuid());
+        tool.setPrice(rq.price());
+        tool.setOwnershipType(rq.ownershipType());
+        tool.setRentTill(rq.rentTill());
+        tool.setIsKit(rq.isKit());
+        tool.setKitUuid(rq.kitUuid());
+        tool.setBrand(rq.brandId() == null ? null : brandService.getReference(rq.brandId()));
+        tool.setCategory(rq.categoryId() == null ? null : categoryService.getReference(rq.categoryId()));
+
+        tool.removeLabels();
+        rq.labels().stream().map(labelId -> labelService.getReference(labelId)).forEach(tool::addLabel);
+
+        tool.setIsArchived(rq.isArchived());
+    }
+}

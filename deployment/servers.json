@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "tools_management": {
+      "Name": "tools_management",
+      "Group": "tools_management_group",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "tools_management",
+      "Username": "tools_management_user",
+      "PassFile": "/pgpass",
+      "SSLMode": "prefer"
+    }
+  }
+}

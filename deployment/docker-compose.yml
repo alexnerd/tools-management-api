@@ -1,0 +1,37 @@
+version: '3.8'
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15.3-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: SuperSecret
+      POSTGRES_USER: tools_management_user
+      POSTGRES_DB: tools_management
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:7.1
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: SuperSecret
+    ports:
+      - "5050:80"
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
+      - ./pgpass:/pgpass
+    depends_on:
+      - postgres
+  tools:
+    build: .
+    container_name: tools-management-api
+    environment:
+      DATABASE_PASSWORD: SuperSecret
+      DATABASE_USER: tools_management_user
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/tools_management"
+    ports:
+      - "8080:8080"
+      - "4545:4545"
+    depends_on:
+      - postgres
+
