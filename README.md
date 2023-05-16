@@ -26,3 +26,9 @@ login: admin@admin.com
 password: SuperSecret
 
 password for database connection: SuperSecret
+
+## Metrics
+http://localhost:8080/tools-management-api/actuator
+
+## Healthcheks
+http://localhost:8080/tools-management-api/actuator/health
