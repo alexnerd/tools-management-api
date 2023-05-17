@@ -17,6 +17,7 @@ import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.Too
 import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.ToolRequest;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.Tool;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.repository.ToolRepository;
+import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification;
 import tech.konso.toolsmanagement.modules.tools.business.tool.service.mappers.ToolsDtoMapper;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
@@ -51,7 +52,7 @@ public class ToolService {
     }
 
     /**
-     * Finds tool by id.
+     * Find tool in database by unique id. Tool must exist in database
      * <p>
      * Example:
      * <pre>
@@ -67,7 +68,7 @@ public class ToolService {
     }
 
     /**
-     * Finds all tools by specification and returns it in pageable format.
+     * Finds tools by tool specification and returns it in pageable format.
      * By default, result set sorts by create date from newer to older and without archived tools.
      * <p>
      * Example:
@@ -80,7 +81,7 @@ public class ToolService {
      * @param size of the returned page
      * @param spec set of tool specification
      * @return {@link ToolFilterResponse} object for resulting dataset in pageable format
-     * @see tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification tool specifications
+     * @see ToolSpecification tool specifications
      */
     public Page<ToolFilterInfo> findAll(int page, int size, Specification<Tool> spec) {
         AbstractSpecification.SpecBuilder<Tool> builder = specBuilder(Tool.class);
@@ -89,7 +90,7 @@ public class ToolService {
     }
 
     /**
-     * Update tool by id.
+     * Update tool by unique id. Tool to update must exist in database.
      * Run under transaction.
      * <p>
      * Example:
@@ -106,12 +107,28 @@ public class ToolService {
     @Transactional
     public Tool update(Long id, ToolRequest rq) {
         Tool tool = repository.findById(id).orElseThrow(() -> new BPException("Tool not found id: " + id));
-        updateToolFromRequest(rq, tool);
+        tool.setName(rq.name());
+        tool.setIsConsumable(rq.isConsumable());
+        tool.setInventoryNumber(rq.inventoryNumber());
+        tool.setResponsibleUuid(rq.responsibleUuid());
+        tool.setProjectUuid(rq.projectUuid());
+        tool.setPrice(rq.price());
+        tool.setOwnershipType(rq.ownershipType());
+        tool.setRentTill(rq.rentTill());
+        tool.setIsKit(rq.isKit());
+        tool.setKitUuid(rq.kitUuid());
+        tool.setBrand(rq.brandId() == null ? null : brandService.getReference(rq.brandId()));
+        tool.setCategory(rq.categoryId() == null ? null : categoryService.getReference(rq.categoryId()));
+
+        tool.removeLabels();
+        rq.labels().stream().map(labelId -> labelService.getReference(labelId)).forEach(tool::addLabel);
+
+        tool.setIsArchived(rq.isArchived());
         return tool;
     }
 
     /**
-     * Save new tool.
+     * Save new tool to database.
      * Run under transaction.
      * <p>
      * Example:
@@ -145,38 +162,5 @@ public class ToolService {
 
         tool.setIsArchived(rq.isArchived());
         return repository.save(tool);
-    }
-
-    /**
-     * Update tool object by request
-     * <p>
-     * Example:
-     * <pre>
-     *     updateToolFromRequest(rq, tool);
-     * </pre>
-     *
-     * @param rq {@link ToolRequest} object for creating tool
-     * @param tool {@link Tool} tool object for updating or creating
-     * @see ToolService#save(ToolRequest)
-     * @see ToolService#update(Long, ToolRequest)
-     */
-    private void updateToolFromRequest(ToolRequest rq, Tool tool) {
-        tool.setName(rq.name());
-        tool.setIsConsumable(rq.isConsumable());
-        tool.setInventoryNumber(rq.inventoryNumber());
-        tool.setResponsibleUuid(rq.responsibleUuid());
-        tool.setProjectUuid(rq.projectUuid());
-        tool.setPrice(rq.price());
-        tool.setOwnershipType(rq.ownershipType());
-        tool.setRentTill(rq.rentTill());
-        tool.setIsKit(rq.isKit());
-        tool.setKitUuid(rq.kitUuid());
-        tool.setBrand(rq.brandId() == null ? null : brandService.getReference(rq.brandId()));
-        tool.setCategory(rq.categoryId() == null ? null : categoryService.getReference(rq.categoryId()));
-
-        tool.removeLabels();
-        rq.labels().stream().map(labelId -> labelService.getReference(labelId)).forEach(tool::addLabel);
-
-        tool.setIsArchived(rq.isArchived());
     }
 }
