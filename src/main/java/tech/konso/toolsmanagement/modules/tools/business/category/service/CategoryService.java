@@ -25,7 +25,7 @@ public class CategoryService {
     private CategoryRepository repository;
 
     /**
-     * Finds category by id.
+     * Find category in database by unique id. Category must exist in database
      * <p>
      * Example:
      * <pre>
@@ -41,7 +41,8 @@ public class CategoryService {
     }
 
     /**
-     * Returns proxy object referenced by category.
+     * Get category reference by unique id. Used to link the category entity with other entities,
+     * when the entire object from the database should not be loaded
      * <p>
      * Example:
      * <pre>
@@ -56,7 +57,7 @@ public class CategoryService {
     }
 
     /**
-     * Finds all categories by specification and returns it in pageable format.
+     * Finds categories by category specification and returns it in pageable format.
      * By default, result set sorts by create date from newer to older and without archived categories.
      * <p>
      * Example:
@@ -78,8 +79,8 @@ public class CategoryService {
     }
 
     /**
-     * Update category by id.
-     * Supports updating name and archived flag.
+     * Update category by unique id. Supports updating name and archived flag.
+     * Category to update must exist in database.
      * Run under transaction.
      * <p>
      * Example:
@@ -102,7 +103,7 @@ public class CategoryService {
     }
 
     /**
-     * Save new category.
+     * Save new category to database.
      * Category name must be unique and not exists in database.
      * <p>
      * Example:
