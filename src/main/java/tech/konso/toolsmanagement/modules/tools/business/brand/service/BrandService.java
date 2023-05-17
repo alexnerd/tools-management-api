@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.konso.toolsmanagement.modules.tools.business.brand.controller.dto.BrandRequest;
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.dao.Brand;
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.repository.BrandRepository;
+import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.specification.BrandSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
@@ -25,7 +26,7 @@ public class BrandService {
     private BrandRepository repository;
 
     /**
-     * Finds brand by id.
+     * Find brand in database by unique id. Brand must exist in database
      * <p>
      * Example:
      * <pre>
@@ -41,7 +42,8 @@ public class BrandService {
     }
 
     /**
-     * Returns proxy object referenced by brand.
+     * Get brand reference by unique id. Used to link the brand entity with other entities,
+     * when the entire object from the database should not be loaded
      * <p>
      * Example:
      * <pre>
@@ -56,7 +58,7 @@ public class BrandService {
     }
 
     /**
-     * Finds all brands by specification and returns it in pageable format.
+     * Find brands by brand specification and returns it in pageable format.
      * By default, result set sorts by create date from newer to older and without archived brands.
      * <p>
      * Example:
@@ -69,7 +71,7 @@ public class BrandService {
      * @param size of the returned page
      * @param spec set of brand specification
      * @return {@link Page<Brand>} object for resulting dataset in pageable format
-     * @see tech.konso.toolsmanagement.modules.tools.business.brand.persistence.specification.BrandSpecification brand specifications
+     * @see BrandSpecification brand specifications
      */
     public Page<Brand> findAll(int page, int size, Specification<Brand> spec) {
         AbstractSpecification.SpecBuilder<Brand> builder = specBuilder(Brand.class);
@@ -78,8 +80,8 @@ public class BrandService {
     }
 
     /**
-     * Update brand by id.
-     * Supports updating name and archived flag.
+     * Update brand by unique id. Supports updating name and archived flag.
+     * Brand to update must exist in database.
      * Run under transaction.
      * <p>
      * Example:
@@ -102,7 +104,7 @@ public class BrandService {
     }
 
     /**
-     * Save new brand.
+     * Save new brand to database.
      * Brand name must be unique and not exists in database.
      * <p>
      * Example:
