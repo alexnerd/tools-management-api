@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryRequest;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.repository.CategoryRepository;
+import tech.konso.toolsmanagement.modules.tools.business.category.persistence.specification.CategorySpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
@@ -70,7 +71,7 @@ public class CategoryService {
      * @param size of the returned page
      * @param spec set of category specification
      * @return {@link Page<Category>} object for resulting dataset in pageable format
-     * @see tech.konso.toolsmanagement.modules.tools.business.category.persistence.specification.CategorySpecification category specifications
+     * @see CategorySpecification category specifications
      */
     public Page<Category> findAll(int page, int size, Specification<Category> spec) {
         AbstractSpecification.SpecBuilder<Category> builder = specBuilder(Category.class);
