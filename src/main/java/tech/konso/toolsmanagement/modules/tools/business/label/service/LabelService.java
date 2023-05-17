@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tech.konso.toolsmanagement.modules.tools.business.label.controller.dto.LabelRequest;
 import tech.konso.toolsmanagement.modules.tools.business.label.persistence.dao.Label;
 import tech.konso.toolsmanagement.modules.tools.business.label.persistence.repository.LabelRepository;
+import tech.konso.toolsmanagement.modules.tools.business.label.persistence.specification.LabelSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
@@ -25,7 +26,7 @@ public class LabelService {
     private LabelRepository repository;
 
     /**
-     * Finds label by id.
+     * Find label in database by unique id. Label must exist in database
      * <p>
      * Example:
      * <pre>
@@ -41,7 +42,8 @@ public class LabelService {
     }
 
     /**
-     * Returns proxy object referenced by label.
+     * Get label reference by unique id. Used to link the label entity with other entities,
+     * when the entire object from the database should not be loaded
      * <p>
      * Example:
      * <pre>
@@ -56,7 +58,7 @@ public class LabelService {
     }
 
     /**
-     * Finds all labels by specification and returns it in pageable format.
+     * Finds labels by label specification and returns it in pageable format.
      * By default, result set sorts by create date from newer to older and without archived labels.
      * <p>
      * Example:
@@ -69,7 +71,7 @@ public class LabelService {
      * @param size of the returned page
      * @param spec set of label specification
      * @return {@link Page<Label>} object for resulting dataset in pageable format
-     * @see tech.konso.toolsmanagement.modules.tools.business.label.persistence.specification.LabelSpecification label specifications
+     * @see LabelSpecification label specifications
      */
     public Page<Label> findAll(int page, int size, Specification<Label> spec) {
         AbstractSpecification.SpecBuilder<Label> builder = specBuilder(Label.class);
@@ -78,8 +80,8 @@ public class LabelService {
     }
 
     /**
-     * Update label by id.
-     * Supports updating name and archived flag.
+     * Update label by unique id. Supports updating name and archived flag.
+     * Label to update must exist in database.
      * Run under transaction.
      * <p>
      * Example:
@@ -102,7 +104,7 @@ public class LabelService {
     }
 
     /**
-     * Save new label.
+     * Save new label to database.
      * Label name must be unique and not exists in database.
      * <p>
      * Example:
