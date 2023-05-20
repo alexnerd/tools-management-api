@@ -74,7 +74,7 @@ public class ToolControllerTest extends AbstractControllerTest {
     private ToolRequest.ToolRequestBuilder getDefaultToolRequest() {
         return ToolRequest.builder()
                 .name("new_tool")
-                .ownershipType(OwnershipType.OWN)
+                .ownershipType(OwnershipType.OWN.name())
                 .isConsumable(false)
                 .isKit(false)
                 .isArchived(false)
@@ -427,7 +427,7 @@ public class ToolControllerTest extends AbstractControllerTest {
      * {@link ToolController#update(Long, ToolRequest)} should return bad request with null tool name.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with null tool name.
-     * Then checks if controller response with bad request.
+     * Then checks if controller response with unprocessable entity.
      */
     @Test
     public void update_should_return_bad_request_for_null_name_test() throws Exception {
@@ -439,14 +439,14 @@ public class ToolControllerTest extends AbstractControllerTest {
         mockMvc.perform(put(urlEndpoint() + "/" + toolId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     /**
      * {@link ToolController#update(Long, ToolRequest)} should return bad request with blank tool name.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with blank tool name.
-     * Then checks if controller response with bad request.
+     * Then checks if controller response with unprocessable entity.
      */
     @Test
     public void update_should_return_bad_request_for_blank_name_test() throws Exception {
@@ -458,14 +458,14 @@ public class ToolControllerTest extends AbstractControllerTest {
         mockMvc.perform(put(urlEndpoint() + "/" + toolId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     /**
      * {@link ToolController#update(Long, ToolRequest)} should return bad request with empty tool name.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with empty tool name.
-     * Then checks if controller response with bad request.
+     * Then checks if controller response with unprocessable entity.
      */
     @Test
     public void update_should_return_bad_request_for_empty_name_test() throws Exception {
@@ -477,7 +477,7 @@ public class ToolControllerTest extends AbstractControllerTest {
         mockMvc.perform(put(urlEndpoint() + "/" + toolId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     /**
@@ -515,6 +515,46 @@ public class ToolControllerTest extends AbstractControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
+    }
+
+    /**
+     * {@link ToolController#update(Long, ToolRequest)} should return unprocessable entity with null tool ownership.
+     * Test finds existing tool id in database with jdbcTemplate.
+     * Then send request for update by id with null tool ownership.
+     * Then checks if controller response with unprocessable entity.
+     */
+    @Test
+    public void update_should_return_unprocessable_entity_for_null_ownership_type_test() throws Exception {
+        long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
+        ToolRequest rq = getDefaultToolRequest()
+                .ownershipType(null)
+                .build();
+
+        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rq)))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    /**
+     * {@link ToolController#update(Long, ToolRequest)} should return unprocessable entity with unknown ownership.
+     * Test finds existing tool id in database with jdbcTemplate.
+     * Then send request for update by id with unknown tool ownership.
+     * Then checks if controller response with unprocessable entity.
+     */
+    @Test
+    public void update_should_return_unprocessable_entity_for_unknown_ownership_type_test() throws Exception {
+        long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
+        ToolRequest rq = getDefaultToolRequest()
+                .ownershipType("TEST")
+                .build();
+
+        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rq)))
+                .andDo(print())
+                .andExpect(status().isUnprocessableEntity());
     }
 
     /**
@@ -563,7 +603,7 @@ public class ToolControllerTest extends AbstractControllerTest {
     /**
      * {@link ToolController#save(ToolRequest)} should not save {@link Tool} object if tool name is null.
      * Test sends request to create new tool with null tool name.
-     * Then checks if controller response with bad request.
+     * Then checks if controller response with unprocessable entity.
      */
     @Test
     public void save_should_not_save_if_name_null_test() throws Exception {
@@ -574,13 +614,13 @@ public class ToolControllerTest extends AbstractControllerTest {
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     /**
      * {@link ToolController#save(ToolRequest)} should not save {@link Tool} object if tool name is empty.
      * Test sends request to create new tool with empty tool name.
-     * Then checks if controller response with bad request.
+     * Then checks if controller response with unprocessable entity.
      */
     @Test
     public void save_should_not_save_if_name_empty_test() throws Exception {
@@ -591,13 +631,13 @@ public class ToolControllerTest extends AbstractControllerTest {
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     /**
      * {@link ToolController#save(ToolRequest)} should not save {@link Tool} object if tool name is blank.
      * Test sends request to create new tool with blank tool name.
-     * Then checks if controller response with bad request.
+     * Then checks if controller response with unprocessable entity.
      */
     @Test
     public void save_should_not_save_if_name_blank_test() throws Exception {
@@ -608,13 +648,13 @@ public class ToolControllerTest extends AbstractControllerTest {
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     /**
      * {@link ToolController#save(ToolRequest)} should not save {@link Tool} object if archived flag is null.
      * Test sends request to create new tool with null archived flag.
-     * Then checks if controller response with bad request.
+     * Then checks if controller response with unprocessable entity.
      */
     @Test
     public void save_should_not_save_if_is_archived_null_test() throws Exception {
@@ -625,6 +665,40 @@ public class ToolControllerTest extends AbstractControllerTest {
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    /**
+     * {@link ToolController#save(ToolRequest)} should not save {@link Tool} object if ownership type is null.
+     * Test sends request to create new tool with null ownership type.
+     * Then checks if controller response with unprocessable entity.
+     */
+    @Test
+    public void save_should_not_save_if_ownership_type_null_test() throws Exception {
+        ToolRequest rq = getDefaultToolRequest()
+                .ownershipType(null)
+                .build();
+
+        mockMvc.perform(post(urlEndpoint())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rq)))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    /**
+     * {@link ToolController#save(ToolRequest)} should not save {@link Tool} object if ownership type is unsupported.
+     * Test sends request to create new tool with unsupported ownership type.
+     * Then checks if controller response with unprocessable entity.
+     */
+    @Test
+    public void save_should_not_save_with_unsupported_ownership_type_test() throws Exception {
+        ToolRequest rq = getDefaultToolRequest()
+                .ownershipType("TEST")
+                .build();
+
+        mockMvc.perform(post(urlEndpoint())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rq)))
+                .andExpect(status().isUnprocessableEntity());
     }
 }

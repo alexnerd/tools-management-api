@@ -16,6 +16,7 @@ import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.Too
 import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.ToolInfo;
 import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.ToolRequest;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.Tool;
+import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.enums.OwnershipType;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.repository.ToolRepository;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification;
 import tech.konso.toolsmanagement.modules.tools.business.tool.service.mappers.ToolsDtoMapper;
@@ -113,7 +114,7 @@ public class ToolService {
         tool.setResponsibleUuid(rq.responsibleUuid());
         tool.setProjectUuid(rq.projectUuid());
         tool.setPrice(rq.price());
-        tool.setOwnershipType(rq.ownershipType());
+        tool.setOwnershipType(OwnershipType.valueOf(rq.ownershipType()));
         tool.setRentTill(rq.rentTill());
         tool.setIsKit(rq.isKit());
         tool.setKitUuid(rq.kitUuid());
@@ -150,7 +151,7 @@ public class ToolService {
         tool.setResponsibleUuid(rq.responsibleUuid());
         tool.setProjectUuid(rq.projectUuid());
         tool.setPrice(rq.price());
-        tool.setOwnershipType(rq.ownershipType());
+        tool.setOwnershipType(OwnershipType.valueOf(rq.ownershipType()));
         tool.setRentTill(rq.rentTill());
         tool.setIsKit(rq.isKit());
         tool.setKitUuid(rq.kitUuid());

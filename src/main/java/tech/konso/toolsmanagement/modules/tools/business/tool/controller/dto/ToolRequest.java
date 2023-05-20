@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.enums.OwnershipType;
 import tech.konso.toolsmanagement.modules.tools.commons.validators.NullOrNotBlank;
+import tech.konso.toolsmanagement.modules.tools.commons.validators.ValueOfEnum;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -46,8 +47,9 @@ public record ToolRequest(@Schema(description = "tool name", example = "Makita M
                           @Schema(description = "tool price", example = "23400.11")
                           BigDecimal price,
                           @Schema(description = "type of ownership", example = "OWN")
-                          @NotNull
-                          OwnershipType ownershipType,
+                          @NotNull(message = "ownershipType must not be null")
+                          @ValueOfEnum(enumClass = OwnershipType.class)
+                          String ownershipType,
                           @Schema(description = "last day of tool rent", example = "2024-12-30")
                           LocalDate rentTill,
                           @Schema(description = "flag is the tool a kit", example = "false")

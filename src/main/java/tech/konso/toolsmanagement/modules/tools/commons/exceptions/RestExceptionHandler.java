@@ -2,50 +2,66 @@ package tech.konso.toolsmanagement.modules.tools.commons.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.stream.Collectors;
 
 @Slf4j
 @ControllerAdvice
-public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+public class RestExceptionHandler {
 
     @ExceptionHandler(BPException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleBusinessException(BPException e, WebRequest request) {
-        log.error(e.getMessage(), e);
+    public ResponseEntity<?> handleBusinessException(BPException ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("detail", e.getMessage())
+                .header("detail", ex.getMessage())
                 .build();
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleInvalidArgumentException(ConstraintViolationException e, WebRequest request) {
-        log.error(e.getMessage(), e);
+    public ResponseEntity<?> handleInvalidArgumentException(ConstraintViolationException ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("detail", e.getMessage())
+                .header("detail", ex.getMessage())
                 .build();
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<?> handleInvalidArgumentException(DataIntegrityViolationException e, WebRequest request) {
-        log.error(e.getMessage(), e);
+    public ResponseEntity<?> handleInvalidArgumentException(DataIntegrityViolationException ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("detail", e.getMessage())
+                .header("detail", ex.getMessage())
+                .build();
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleInvalidArgumentException(MethodArgumentNotValidException ex, WebRequest request) {
+        log.error(ex.getMessage(), ex);
+
+        String errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("detail", errors)
                 .build();
     }
 }
