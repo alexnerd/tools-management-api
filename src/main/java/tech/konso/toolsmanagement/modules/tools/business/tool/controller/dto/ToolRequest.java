@@ -38,7 +38,7 @@ public record ToolRequest(@Schema(description = "tool name", example = "Makita M
                           @NotBlank String name,
                           @Schema(description = "consumable mark", example = "false")
                           @NotNull Boolean isConsumable,
-                          @Schema(description = "tool inventory number", example = "0014-HANDTOOL")
+                          @Schema(description = "tool inventory number", example = "0014-HANDTOOL", nullable = true)
                           @NullOrNotBlank String inventoryNumber,
                           @Schema(description = "business key from Module Persons - Person person", example = "935921a7-692e-4ee4-a089-2695b68e9804", nullable = true)
                           UUID responsibleUuid,
