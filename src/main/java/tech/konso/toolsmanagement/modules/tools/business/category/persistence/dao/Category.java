@@ -38,7 +38,7 @@ public class Category implements Serializable {
     private String name;
 
     /**
-     * Archived mark. Must be not nullable
+     * Archived flag. Must be not nullable
      */
     @Column(name = "is_archived", nullable = false)
     private Boolean isArchived;

@@ -55,7 +55,7 @@ public class Tool implements Serializable {
     private String name;
 
     /**
-     * Consumable mark. Must be not nullable (расходный материал)
+     * Consumable flag. Must be not nullable (расходный материал)
      */
     @Setter
     @Column(name = "is_consumable", nullable = false)
@@ -147,7 +147,7 @@ public class Tool implements Serializable {
     private Set<Label> labels = new HashSet<>();
 
     /**
-     * Archived mark. Must be not nullable
+     * Archived flag. Must be not nullable
      */
     @Setter
     @Column(name = "is_archived", nullable = false)

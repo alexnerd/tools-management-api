@@ -16,7 +16,7 @@ import java.util.UUID;
  * @param id              tool id
  * @param uuid            tool business key
  * @param name            of the tool, must not be blank
- * @param isConsumable    consumable mark, must not be null
+ * @param isConsumable    consumable flag, must not be null
  * @param brand           brand name
  * @param inventoryNumber tool inventory number, may be null or must not be blank
  * @param responsible     responsible person name

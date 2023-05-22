@@ -18,7 +18,7 @@ import java.util.UUID;
  * DTO class for request to save new tool or updating existing tool.
  *
  * @param name            of the tool, must not be blank
- * @param isConsumable    consumable mark, must not be null
+ * @param isConsumable    consumable flag, must not be null
  * @param inventoryNumber tool inventory number, may be null or must not be blank
  * @param responsibleUuid business key from Module Persons - Person person
  * @param projectUuid     business key from Module Projects - Project project"
@@ -36,7 +36,7 @@ import java.util.UUID;
 @Builder
 public record ToolRequest(@Schema(description = "tool name", example = "Makita MTK24")
                           @NotBlank String name,
-                          @Schema(description = "consumable mark", example = "false")
+                          @Schema(description = "consumable flag", example = "false")
                           @NotNull Boolean isConsumable,
                           @Schema(description = "tool inventory number", example = "0014-HANDTOOL", nullable = true)
                           @NullOrNotBlank String inventoryNumber,
