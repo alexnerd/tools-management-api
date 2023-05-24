@@ -35,6 +35,8 @@ import java.util.UUID;
  */
 
 @Builder
+@Schema(description = "Tool information with simplified inner objects" +
+        "(just returns names for inner objects or other simple information to display)")
 public record ToolFilterInfo(@Schema(description = "tool id", example = "1")
                              Long id,
                              @Schema(description = "tool business key", example = "3996a6ee-c40e-4401-b8c8-2f96f49d0c22")
