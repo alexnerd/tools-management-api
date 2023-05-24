@@ -1,5 +1,6 @@
 package tech.konso.toolsmanagement.modules.tools.business.brand.controller.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.dao.Brand;
 
 import java.util.List;
@@ -10,5 +11,10 @@ import java.util.List;
  * @param brands     list of found brands. List size limited by page size
  * @param totalItems total number of brands found
  */
-public record BrandFilterResponse(List<Brand> brands, Long totalItems) {
+
+@Schema(description = "Response for return result set of brands in pageable format")
+public record BrandFilterResponse(@Schema(description = "list of found brands, list size limited by page size")
+                                  List<Brand> brands,
+                                  @Schema(description = "total number of brands found")
+                                  Long totalItems) {
 }
