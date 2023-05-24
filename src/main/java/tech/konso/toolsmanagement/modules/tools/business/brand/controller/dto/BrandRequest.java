@@ -1,6 +1,5 @@
 package tech.konso.toolsmanagement.modules.tools.business.brand.controller.dto;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,8 +10,9 @@ import jakarta.validation.constraints.NotNull;
  * @param name       of the brand, must not be blank
  * @param isArchived flag, must not be null
  */
+
 public record BrandRequest(@Schema(description = "brand name", example = "Makita")
-                                @NotBlank String name,
+                           @NotBlank String name,
                            @Schema(description = "archived flag", example = "false")
-                                @NotNull Boolean isArchived) {
+                           @NotNull Boolean isArchived) {
 }
