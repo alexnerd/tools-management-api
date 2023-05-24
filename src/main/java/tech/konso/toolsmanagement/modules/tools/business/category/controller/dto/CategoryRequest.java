@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
  * @param isArchived flag, must not be null
  */
 
+@Schema(description = "Request to save new category or updating existing category")
 public record CategoryRequest(@Schema(description = "category name", example = "Hand tools")
                               @NotBlank String name,
                               @Schema(description = "archived flag", example = "false")
