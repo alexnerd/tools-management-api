@@ -1,5 +1,7 @@
 package tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 /**
@@ -8,5 +10,8 @@ import java.util.List;
  * @param tools      list of found tools. List size limited by page size
  * @param totalItems total number of tools found
  */
-public record ToolFilterResponse(List<ToolFilterInfo> tools, Long totalItems) {
+public record ToolFilterResponse( @Schema(description = "list of found tools. List size limited by page size")
+                                  List<ToolFilterInfo> tools,
+                                  @Schema(description = "total number of tools found", example = "20")
+                                  Long totalItems) {
 }
