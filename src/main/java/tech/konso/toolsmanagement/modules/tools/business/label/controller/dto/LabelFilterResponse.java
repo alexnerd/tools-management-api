@@ -15,6 +15,6 @@ import java.util.List;
 @Schema(description = "Response for return result set of labels in pageable format")
 public record LabelFilterResponse(@Schema(description = "list of found labels, list size limited by page size")
                                   List<Label> labels,
-                                  @Schema(description = "total number of labels found")
+                                  @Schema(description = "total number of labels found", example = "20")
                                   Long totalItems) {
 }

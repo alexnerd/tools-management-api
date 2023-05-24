@@ -15,6 +15,6 @@ import java.util.List;
 @Schema(description = "Response for return result set of categories in pageable format")
 public record CategoryFilterResponse(@Schema(description = "list of found categories, list size limited by page size")
                                      List<Category> categories,
-                                     @Schema(description = "total number of categories found")
+                                     @Schema(description = "total number of categories found", example = "20")
                                      Long totalItems) {
 }

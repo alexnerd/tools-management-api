@@ -15,6 +15,6 @@ import java.util.List;
 @Schema(description = "Response for return result set of brands in pageable format")
 public record BrandFilterResponse(@Schema(description = "list of found brands, list size limited by page size")
                                   List<Brand> brands,
-                                  @Schema(description = "total number of brands found")
+                                  @Schema(description = "total number of brands found", example = "20")
                                   Long totalItems) {
 }
