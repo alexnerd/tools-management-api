@@ -34,6 +34,7 @@ import java.util.UUID;
  */
 
 @Builder
+@Schema(description = "Tool full information")
 public record ToolInfo(@Schema(description = "tool id", example = "1")
                        Long id,
                        @Schema(description = "tool business key", example = "3996a6ee-c40e-4401-b8c8-2f96f49d0c22")
