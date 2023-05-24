@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
  * @param isArchived flag, must not be null
  */
 
+@Schema(description = "Request to save new label or updating existing label")
 public record LabelRequest(@Schema(description = "label name", example = "Attention")
                            @NotBlank String name,
                            @Schema(description = "archived flag", example = "false")
