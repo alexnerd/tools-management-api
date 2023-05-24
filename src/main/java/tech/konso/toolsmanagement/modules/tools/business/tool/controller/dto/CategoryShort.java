@@ -1,5 +1,6 @@
 package tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 /**
@@ -11,5 +12,9 @@ import lombok.Builder;
  */
 
 @Builder
-public record CategoryShort(Long id, String name) {
+@Schema(description = "Short category description used to describe tool category by basic fields")
+public record CategoryShort(@Schema(description = "category id", example = "1")
+                            Long id,
+                            @Schema(description = "category name", example = "Hand tool")
+                            String name) {
 }
