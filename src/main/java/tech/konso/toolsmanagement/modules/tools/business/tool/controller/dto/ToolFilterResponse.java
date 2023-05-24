@@ -10,8 +10,8 @@ import java.util.List;
  * @param tools      list of found tools. List size limited by page size
  * @param totalItems total number of tools found
  */
-public record ToolFilterResponse( @Schema(description = "list of found tools. List size limited by page size")
-                                  List<ToolFilterInfo> tools,
-                                  @Schema(description = "total number of tools found", example = "20")
-                                  Long totalItems) {
+public record ToolFilterResponse(@Schema(description = "list of found tools. List size limited by page size")
+                                 List<ToolFilterInfo> tools,
+                                 @Schema(description = "total number of tools found", example = "20")
+                                 Long totalItems) {
 }
