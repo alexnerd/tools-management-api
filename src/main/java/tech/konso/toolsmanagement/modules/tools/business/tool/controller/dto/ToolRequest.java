@@ -1,6 +1,5 @@
 package tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -34,6 +33,7 @@ import java.util.UUID;
  */
 
 @Builder
+@Schema(description = "Request to save new tool or updating existing tool")
 public record ToolRequest(@Schema(description = "tool name", example = "Makita MTK24")
                           @NotBlank String name,
                           @Schema(description = "consumable flag", example = "false")
