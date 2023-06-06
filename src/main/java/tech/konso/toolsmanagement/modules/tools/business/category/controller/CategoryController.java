@@ -71,7 +71,7 @@ public class CategoryController {
     @Operation(summary = "Update existing category by id")
     @Parameters({
             @Parameter(name ="id", description = "id of category to be updated", example = "7", required = true),
-            @Parameter(name = "rq", description = "Request body fo update category", required = true,
+            @Parameter(name = "rq", description = "Request body for update category", required = true,
                     schema = @Schema(implementation = CategoryRequest.class))
     })
     @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
