@@ -1,5 +1,7 @@
 package tech.konso.toolsmanagement.modules.tools.business.category.service;
 
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -7,10 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryInfo;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryRequest;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.repository.CategoryRepository;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.specification.CategorySpecification;
+import tech.konso.toolsmanagement.modules.tools.business.category.service.mappers.CategoryDtoMapper;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
@@ -19,26 +23,36 @@ import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecifica
 /**
  * Service layer for working with categories.
  */
+@Slf4j
 @Service
 public class CategoryService {
 
     @Autowired
     private CategoryRepository repository;
 
+    private CategoryDtoMapper mapper;
+
+    @PostConstruct
+    public void init() {
+        mapper = new CategoryDtoMapper();
+    }
+
     /**
      * Find category in database by unique id. Category must exist in database
      * <p>
      * Example:
      * <pre>
-     *     Category category = findById(2L);
+     *     CategoryInfo category = findById(2L);
      * </pre>
      *
      * @param id of category, must exist in database
-     * @return category from database
+     * @return {@link CategoryInfo} dto object mapped by category object from database
      * @throws BPException if category not exists in database
      */
-    public Category findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new BPException("Category not found id: " + id));
+    public CategoryInfo findById(Long id) {
+        return repository.findById(id)
+                .map(category -> mapper.mapToCategoryInfo(category))
+                .orElseThrow(() -> new BPException("Category not found id: " + id));
     }
 
     /**
@@ -73,20 +87,23 @@ public class CategoryService {
      * @return {@link Page<Category>} object for resulting dataset in pageable format
      * @see CategorySpecification category specifications
      */
-    public Page<Category> findAll(int page, int size, Specification<Category> spec) {
+    public Page<CategoryInfo> findAll(int page, int size, Specification<Category> spec) {
         AbstractSpecification.SpecBuilder<Category> builder = specBuilder(Category.class);
         Pageable pageable = PageRequest.of(page, size);
-        return repository.findAll(builder.and(spec).build(), pageable);
+        return repository.findAll(builder.and(spec).build(), pageable)
+                .map(category -> mapper.mapToCategoryInfo(category));
     }
 
     /**
-     * Update category by unique id. Supports updating name and archived flag.
+     * Update category by unique id. Supports updating name , parent category and archived flag.
+     * If category become archived then it's subcategories become archived too.
      * Category to update must exist in database.
+     * Category id and parent category id must not be the same.
      * Run under transaction.
      * <p>
      * Example:
      * <pre>
-     *     CategoryRequest rq = new CategoryRequest("new_category", true);
+     *     CategoryRequest rq = new CategoryRequest("new_category", 1, true);
      *     service.update(categoryId, rq);
      * </pre>
      *
@@ -97,9 +114,20 @@ public class CategoryService {
      */
     @Transactional
     public Category update(Long id, CategoryRequest rq) {
+        if (id.equals(rq.parentCategoryId())){
+            throw new BPException("Category id and parent category id must not be the same, id: " + id);
+        }
         Category category = repository.findById(id).orElseThrow(() -> new BPException("Category not found id: " + id));
         category.setName(rq.name());
+        category.setParentCategory(
+                rq.parentCategoryId() == null ? null : repository.getReferenceById(rq.parentCategoryId())
+        );
+
+        if (rq.isArchived() && !category.getIsArchived()) {
+            category.getSubcategories().forEach(child -> child.setIsArchived(true));
+        }
         category.setIsArchived(rq.isArchived());
+
         return category;
     }
 
@@ -109,7 +137,7 @@ public class CategoryService {
      * <p>
      * Example:
      * <pre>
-     *     CategoryRequest rq = new CategoryRequest("new_category", false);
+     *     CategoryRequest rq = new CategoryRequest("new_category", 1, false);
      *     Category savedCategory = service.save(rq);
      * </pre>
      *
@@ -119,6 +147,9 @@ public class CategoryService {
     public Category save(CategoryRequest rq) {
         Category category = new Category();
         category.setName(rq.name());
+        category.setParentCategory(
+                rq.parentCategoryId() == null ? null : repository.getReferenceById(rq.parentCategoryId())
+        );
         category.setIsArchived(rq.isArchived());
         return repository.save(category);
     }

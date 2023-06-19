@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryFilterResponse;
+import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryInfo;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryRequest;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
 import tech.konso.toolsmanagement.modules.tools.business.category.service.CategoryService;
@@ -40,7 +41,7 @@ public class CategoryController {
             @Parameter(name = "id", description = "id of category to be searched", example = "7", required = true)
     })
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Category find(@PathVariable("id") Long id) {
+    public CategoryInfo find(@PathVariable("id") Long id) {
         return service.findById(id);
     }
 
@@ -61,9 +62,10 @@ public class CategoryController {
                                        @RequestParam(value = "isArchived", required = false, defaultValue = "false") Boolean isArchived,
                                        @RequestParam(value = "sort", required = false) String sort) {
         // UI pages starts with 1
-        Page<Category> categories = service.findAll(page - 1, size, specBuilder(isArchivedSpec(isArchived)
+        Page<CategoryInfo> categories = service.findAll(page - 1, size, specBuilder(isArchivedSpec(isArchived)
                 .and(likeSpec(name))
                 .and(sortSpec(sort)))
+                .and(isParentSpec(true))
                 .build());
         return new CategoryFilterResponse(categories.getContent(), categories.getTotalElements());
     }

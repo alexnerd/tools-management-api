@@ -9,13 +9,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * Category entity class.
  * Relies on "tools_category" table in database
  */
 @Getter
-@Setter
 @Entity
 @Table(name = "tools_category")
 public class Category implements Serializable {
@@ -34,12 +34,29 @@ public class Category implements Serializable {
     /**
      * Category name. Must be unique and not nullable
      */
+    @Setter
     @Column(nullable = false, unique = true)
     private String name;
 
     /**
+     * Parent category
+     */
+    @Setter
+    @ManyToOne
+    @JoinColumn(name = "parent_category_id")
+    private Category parentCategory;
+
+    /**
+     * Sub categories
+     */
+    @OneToMany(cascade = CascadeType.ALL,
+            mappedBy = "parentCategory")
+    private List<Category> subcategories = new ArrayList<>();
+
+    /**
      * Archived flag. Must be not nullable
      */
+    @Setter
     @Column(name = "is_archived", nullable = false)
     private Boolean isArchived;
 

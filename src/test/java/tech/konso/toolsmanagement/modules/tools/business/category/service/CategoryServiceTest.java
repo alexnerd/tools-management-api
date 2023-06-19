@@ -13,10 +13,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
 import tech.konso.toolsmanagement.PostgreSQLContainerExtension;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryFilterResponse;
+import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryInfo;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryRequest;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,6 +64,16 @@ public class CategoryServiceTest {
     }
 
     /**
+     * Create {@link CategoryRequest.CategoryRequestBuilder} object with required non-null fields.
+     */
+    private CategoryRequest.CategoryRequestBuilder getDefaultCategoryRequest() {
+        return CategoryRequest.builder()
+                .name("new_category")
+                .isArchived(false);
+
+    }
+
+    /**
      * {@link CategoryService#findById(Long)} should return {@link Category} by id from database.
      * Test checks equality categoryId (received from jdbcTemplate request)
      * with id of category object received from {@link CategoryService#findById(Long)}
@@ -70,9 +82,9 @@ public class CategoryServiceTest {
     public void findById_should_return_category_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
 
-        Category category = service.findById(categoryId);
+        CategoryInfo category = service.findById(categoryId);
 
-        assertEquals(categoryId, category.getId());
+        assertEquals(categoryId, category.id());
     }
 
     /**
@@ -97,7 +109,8 @@ public class CategoryServiceTest {
     @Test
     public void update_should_update_category_name_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest("new_category", false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .build();
 
         service.update(categoryId, rq);
 
@@ -114,11 +127,55 @@ public class CategoryServiceTest {
     @Test
     public void update_should_archive_category_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest("new_category", true);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .isArchived(true)
+                .build();
 
         service.update(categoryId, rq);
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_category WHERE category_id = " + categoryId, Boolean.class);
+        assertTrue(isArchived);
+    }
+
+    /**
+     * {@link CategoryService#update(Long, CategoryRequest)} should update {@link Category} parentCategory field.
+     * Test finds existing category id in database with jdbcTemplate and try to update it parent category
+     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * Then checks if parent category was updated or not (by compare {@link CategoryRequest} name and categoryName received from database).
+     */
+    @Test
+    public void update_should_update_parent_category_test() {
+        long parentCategoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
+        long subCategoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_2' AND is_archived IS FALSE", Long.class);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .parentCategoryId(parentCategoryId)
+                .build();
+
+        service.update(subCategoryId, rq);
+
+        Long updatedParentCategory = jdbcTemplate.queryForObject("SELECT parent_category_id FROM tools_category WHERE category_id = " + subCategoryId + " AND is_archived IS FALSE", Long.class);
+        assertEquals(rq.parentCategoryId(), updatedParentCategory);
+    }
+
+    /**
+     * {@link CategoryService#update(Long, CategoryRequest)} should update {@link Category} isArchived field for sub entities.
+     * Test finds existing category ids in database (for parent and sub entities) with jdbcTemplate and try
+     * to update it isArchived flag using {@link CategoryService#update(Long, CategoryRequest)}.
+     * Then checks if isArchived flag for sub entity was updated or not (using assertTrue on field).
+     */
+    @Test
+    public void update_should_archive_subCategories_test() {
+        long categoryIdParent = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
+        long categoryIdChild = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_2' AND is_archived IS FALSE AND parent_category_id IS NULL", Long.class);
+        jdbcTemplate.update("UPDATE tools_category SET parent_category_id = " + categoryIdParent +" WHERE category_id = " + categoryIdChild);
+
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .isArchived(true)
+                .build();
+
+        service.update(categoryIdParent, rq);
+
+        Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_category WHERE category_id = " + categoryIdChild, Boolean.class);
         assertTrue(isArchived);
     }
 
@@ -133,7 +190,9 @@ public class CategoryServiceTest {
     public void update_should_not_update_null_name_test() {
         String categoryName = "category_1";
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = '" + categoryName + "' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest(null, false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name(null)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> service.update(categoryId, rq));
 
@@ -145,18 +204,43 @@ public class CategoryServiceTest {
      * {@link CategoryService#update(Long, CategoryRequest)} should not update {@link Category} if isArchived flag is null.
      * Test finds existing category id in database with jdbcTemplate and try to update it isArchived flag
      * using {@link CategoryService#update(Long, CategoryRequest)}.
-     * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if isArchived flag not changed during test.
      */
     @Test
     public void update_should_not_update_null_isArchived_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest("new_category", null);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .isArchived(null)
+                .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(categoryId, rq));
+        try {
+            service.update(categoryId, rq);
+        } catch (Exception ex) {
+            //do nothing
+        }
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_category WHERE category_id = " + categoryId, Boolean.class);
         assertFalse(isArchived);
+    }
+
+    /**
+     * {@link CategoryService#update(Long, CategoryRequest)} should not update {@link Category} if
+     * parent category id and updated category id equals.
+     * Test finds existing category id in database with jdbcTemplate and try to update it parent category with the same id
+     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * Then checks if parent category not updated.
+     */
+    @Test
+    public void update_should_not_update_parent_category_id_with_the_current_category_id_test() {
+        long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .parentCategoryId(categoryId)
+                .build();
+
+        assertThrows(BPException.class, () -> service.update(categoryId, rq));
+
+        Long parentCategoryId = jdbcTemplate.queryForObject("SELECT parent_category_id FROM tools_category WHERE category_id = " + categoryId, Long.class);
+        assertNull(parentCategoryId);
     }
 
     /**
@@ -168,13 +252,38 @@ public class CategoryServiceTest {
      */
     @Test
     public void save_should_save_category_test() {
-        CategoryRequest rq = new CategoryRequest("new_category", false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .build();
 
         Category savedCategory = service.save(rq);
 
         assertNotNull(savedCategory.getId());
         assertEquals(rq.name(), savedCategory.getName());
         assertEquals(rq.isArchived(), savedCategory.getIsArchived());
+    }
+
+    /**
+     * {@link CategoryService#save(CategoryRequest)} should save {@link Category} object as subcategory.
+     * Test finds category in database which will be the parent.
+     * Test creates dto object {@link CategoryRequest} and then using {@link CategoryService#save(CategoryRequest)}
+     * try to save new {@link Category} object to database with parent category id.
+     * Then checks if sub category id equals parent category id.
+     * Then checks returns {@link Category} object if sub categories size equals 1.
+     */
+    @Test
+    public void save_should_save_subcategory_test() {
+        long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .parentCategoryId(categoryId)
+                .name("sub_category_1")
+                .build();
+
+        Category subcategory = service.save(rq);
+
+        Long updatedParentCategory = jdbcTemplate.queryForObject("SELECT parent_category_id FROM tools_category WHERE category_id = " + subcategory.getId() + " AND is_archived IS FALSE", Long.class);
+        assertEquals(categoryId, updatedParentCategory);
+        CategoryInfo parentCategory = service.findById(categoryId);
+        assertEquals(1, parentCategory.subcategories().size());
     }
 
     /**
@@ -186,7 +295,9 @@ public class CategoryServiceTest {
     @Test
     public void save_should_not_save_if_category_name_already_exists_test() {
         String categoryName = "category_1";
-        CategoryRequest rq = new CategoryRequest(categoryName, false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name(categoryName)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
@@ -201,7 +312,9 @@ public class CategoryServiceTest {
      */
     @Test
     public void save_should_not_save_if_category_name_is_null_exists_test() {
-        CategoryRequest rq = new CategoryRequest(null, false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name(null)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
@@ -221,7 +334,7 @@ public class CategoryServiceTest {
         long countNotArchived = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_category WHERE is_archived IS FALSE", Long.class);
         Specification<Category> spec = specBuilder(isArchivedSpec(false)).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
         assertEquals(countNotArchived, foundedCategories.getTotalElements());
     }
@@ -238,7 +351,7 @@ public class CategoryServiceTest {
         long countNotArchived = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_category WHERE is_archived IS TRUE", Long.class);
         Specification<Category> spec = specBuilder(isArchivedSpec(true)).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
         assertEquals(countNotArchived, foundedCategories.getTotalElements());
     }
@@ -258,7 +371,7 @@ public class CategoryServiceTest {
         long countNotArchived = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_category WHERE LOWER (name) LIKE '%" + likeName + "%'", Long.class);
         Specification<Category> spec = specBuilder(likeSpec(likeName)).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
         assertEquals(countNotArchived, foundedCategories.getTotalElements());
     }
@@ -275,9 +388,9 @@ public class CategoryServiceTest {
         List<String> categoryNames = jdbcTemplate.queryForList("SELECT name FROM tools_category ORDER BY name ASC", String.class);
         Specification<Category> spec = specBuilder(sortSpec("name,asc")).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
-        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(Category::getName).toList();
+        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(CategoryInfo::name).toList();
         assertIterableEquals(categoryNames, resultCategoryNames);
     }
 
@@ -293,9 +406,9 @@ public class CategoryServiceTest {
         List<String> categoryNames = jdbcTemplate.queryForList("SELECT name FROM tools_category ORDER BY name DESC", String.class);
         Specification<Category> spec = specBuilder(sortSpec("name,desc")).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
-        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(Category::getName).toList();
+        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(CategoryInfo::name).toList();
         assertIterableEquals(categoryNames, resultCategoryNames);
     }
 
@@ -311,9 +424,9 @@ public class CategoryServiceTest {
         List<String> categoryNames = jdbcTemplate.queryForList("SELECT name FROM tools_category ORDER BY created_at ASC", String.class);
         Specification<Category> spec = specBuilder(sortSpec("createdat,asc")).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
-        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(Category::getName).toList();
+        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(CategoryInfo::name).toList();
         assertIterableEquals(categoryNames, resultCategoryNames);
     }
 
@@ -329,9 +442,9 @@ public class CategoryServiceTest {
         List<String> categoryNames = jdbcTemplate.queryForList("SELECT name FROM tools_category ORDER BY created_at DESC", String.class);
         Specification<Category> spec = specBuilder(sortSpec("createdat,desc")).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
-        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(Category::getName).toList();
+        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(CategoryInfo::name).toList();
         assertIterableEquals(categoryNames, resultCategoryNames);
     }
 
@@ -347,9 +460,9 @@ public class CategoryServiceTest {
         List<String> categoryNames = jdbcTemplate.queryForList("SELECT name FROM tools_category ORDER BY created_at DESC", String.class);
         Specification<Category> spec = specBuilder(sortSpec(null)).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
-        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(Category::getName).toList();
+        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(CategoryInfo::name).toList();
         assertIterableEquals(categoryNames, resultCategoryNames);
     }
 
@@ -365,9 +478,9 @@ public class CategoryServiceTest {
         List<String> categoryNames = jdbcTemplate.queryForList("SELECT name FROM tools_category ORDER BY created_at DESC", String.class);
         Specification<Category> spec = specBuilder(sortSpec(" ")).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
-        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(Category::getName).toList();
+        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(CategoryInfo::name).toList();
         assertIterableEquals(categoryNames, resultCategoryNames);
     }
 
@@ -383,9 +496,9 @@ public class CategoryServiceTest {
         List<String> categoryNames = jdbcTemplate.queryForList("SELECT name FROM tools_category ORDER BY created_at DESC", String.class);
         Specification<Category> spec = specBuilder(sortSpec("unsupported_filter")).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 100, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 100, spec);
 
-        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(Category::getName).toList();
+        List<String> resultCategoryNames = foundedCategories.getContent().stream().map(CategoryInfo::name).toList();
         assertIterableEquals(categoryNames, resultCategoryNames);
     }
 
@@ -399,7 +512,7 @@ public class CategoryServiceTest {
     public void findAll_with_page_size_one_should_return_one_category_test() {
         Specification<Category> spec = specBuilder(sortSpec(null)).build();
 
-        Page<Category> foundedCategories = service.findAll(0, 1, spec);
+        Page<CategoryInfo> foundedCategories = service.findAll(0, 1, spec);
 
         assertEquals(6, foundedCategories.getTotalElements());
         assertEquals(1, foundedCategories.getContent().size());

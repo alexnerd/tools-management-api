@@ -1,4 +1,15 @@
 spring:
   jpa.open-in-view: false
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
   datasource:
     driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+    org:
+      hibernate:
+        type: trace

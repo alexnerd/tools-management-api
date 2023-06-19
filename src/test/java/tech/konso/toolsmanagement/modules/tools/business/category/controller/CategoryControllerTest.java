@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryFilterResponse;
+import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryInfo;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryRequest;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
 import tech.konso.toolsmanagement.modules.tools.business.category.service.CategoryService;
@@ -59,6 +60,16 @@ public class CategoryControllerTest extends AbstractControllerTest {
         return url + "/v1/tools/categories";
     }
 
+    /**
+     * Create {@link CategoryRequest.CategoryRequestBuilder} object with required non-null fields.
+     */
+    private CategoryRequest.CategoryRequestBuilder getDefaultCategoryRequest() {
+        return CategoryRequest.builder()
+                .name("category_1")
+                .isArchived(false);
+
+    }
+
 
     /**
      * {@link CategoryController#find(Long)} should return {@link Category} by id from database.
@@ -76,6 +87,28 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .andExpect(content().string(dtoMatcher(
                         Category.class,
                         dto -> dto.getId() == categoryId && dto.getName().equals("category_1")
+                )));
+    }
+
+    /**
+     * {@link CategoryController#find(Long)} should return {@link Category} by id from database.
+     * Test checks status code 200 and equality categoryId (received from jdbcTemplate request)
+     * with id of category object received from {@link CategoryService#findById(Long)} and name.
+     */
+    @Test
+    public void find_should_return_sub_category_test() throws Exception {
+        long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
+        jdbcTemplate.update("INSERT INTO tools_category (name, parent_category_id) VALUES ('sub_category_1', '" + categoryId + "')");
+        long subCategoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'sub_category_1' AND is_archived IS FALSE", Long.class);
+
+
+        mockMvc.perform(get(urlEndpoint() + "/" + subCategoryId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(content().string(dtoMatcher(
+                        CategoryInfo.class,
+                        dto -> dto.id() == subCategoryId && dto.name().equals("sub_category_1")
                 )));
     }
 
@@ -205,7 +238,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(content().string(dtoMatcher(
                         CategoryFilterResponse.class,
-                        dto -> dto.totalItems() == count && dto.categories().get(0).getName().equals(categoryName))
+                        dto -> dto.totalItems() == count && dto.categories().get(0).name().equals(categoryName))
                 ));
     }
 
@@ -251,7 +284,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .andExpect(content().string(dtoMatcher(
                         CategoryFilterResponse.class,
                         dto -> {
-                            List<String> categoryNamesResponse = dto.categories().stream().map(Category::getName).toList();
+                            List<String> categoryNamesResponse = dto.categories().stream().map(CategoryInfo::name).toList();
                             assertIterableEquals(categoryNames, categoryNamesResponse);
                             return true;
                         })
@@ -276,7 +309,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .andExpect(content().string(dtoMatcher(
                         CategoryFilterResponse.class,
                         dto -> {
-                            List<String> categoryNamesResponse = dto.categories().stream().map(Category::getName).toList();
+                            List<String> categoryNamesResponse = dto.categories().stream().map(CategoryInfo::name).toList();
                             assertIterableEquals(categoryNames, categoryNamesResponse);
                             return true;
                         })
@@ -301,7 +334,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .andExpect(content().string(dtoMatcher(
                         CategoryFilterResponse.class,
                         dto -> {
-                            List<String> categoryNamesResponse = dto.categories().stream().map(Category::getName).toList();
+                            List<String> categoryNamesResponse = dto.categories().stream().map(CategoryInfo::name).toList();
                             assertIterableEquals(categoryNames, categoryNamesResponse);
                             return true;
                         })
@@ -325,7 +358,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .andExpect(content().string(dtoMatcher(
                         CategoryFilterResponse.class,
                         dto -> {
-                            List<String> categoryNamesResponse = dto.categories().stream().map(Category::getName).toList();
+                            List<String> categoryNamesResponse = dto.categories().stream().map(CategoryInfo::name).toList();
                             assertIterableEquals(categoryNames, categoryNamesResponse);
                             return true;
                         })
@@ -350,7 +383,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .andExpect(content().string(dtoMatcher(
                         CategoryFilterResponse.class,
                         dto -> {
-                            List<String> categoryNamesResponse = dto.categories().stream().map(Category::getName).toList();
+                            List<String> categoryNamesResponse = dto.categories().stream().map(CategoryInfo::name).toList();
                             assertIterableEquals(categoryNames, categoryNamesResponse);
                             return true;
                         })
@@ -366,7 +399,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_update_category_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest("HandTool", false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name("HandTool")
+                .build();
 
         mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -386,7 +421,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_update_category_is_archived_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest("category_1", true);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .isArchived(true)
+                .build();
 
         mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -398,6 +435,25 @@ public class CategoryControllerTest extends AbstractControllerTest {
     }
 
     /**
+     * {@link CategoryController#update(Long, CategoryRequest)} should return bad request with empty category name.
+     * Test finds existing category id in database with jdbcTemplate.
+     * Then send request for update by id with empty category name.
+     * Then checks if controller response with bad request.
+     */
+    @Test
+    public void update_should_should_return_bad_request_if_parent_category_id_equals_current_category_id_test() throws Exception {
+        long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .parentCategoryId(categoryId)
+                .build();
+
+        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rq)))
+                .andExpect(status().isBadRequest());
+    }
+
+    /**
      * {@link CategoryController#update(Long, CategoryRequest)} should return bad request with null category name.
      * Test finds existing category id in database with jdbcTemplate.
      * Then send request for update by id with null category name.
@@ -406,7 +462,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_null_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest(null, true);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name(null)
+                .build();
 
         mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -423,7 +481,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_blank_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest(" ", true);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name("   ")
+                .build();
 
         mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -440,7 +500,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_empty_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest("", true);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name("")
+                .build();
 
         mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -459,7 +521,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_existing_name_test() throws Exception {
         String existingCategoryName = jdbcTemplate.queryForObject("SELECT name FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", String.class);
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_2' AND is_archived IS FALSE", Long.class);
-        CategoryRequest rq = new CategoryRequest(existingCategoryName, false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name(existingCategoryName)
+                .build();
 
         mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -474,7 +538,10 @@ public class CategoryControllerTest extends AbstractControllerTest {
      */
     @Test
     public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
-        CategoryRequest rq = new CategoryRequest("HandTool", true);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name("HandTool")
+                .isArchived(true)
+                .build();
 
         mockMvc.perform(put(urlEndpoint() + "/-1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -495,7 +562,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
         Long countCategories = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_category WHERE name = '" + categoryName + "' AND is_archived IS FALSE", Long.class);
         assertEquals(0, countCategories);
 
-        CategoryRequest rq = new CategoryRequest(categoryName, false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name(categoryName)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -507,13 +576,40 @@ public class CategoryControllerTest extends AbstractControllerTest {
     }
 
     /**
+     * {@link CategoryController#save(CategoryRequest)} should save {@link Category} object as subcategory.
+     * Test finds parent category id in database
+     * Then sends request to create new subcategory and checks status equals created.
+     * Then receive sub category id by parent category id from database.
+     * Then checks if sub category id is not null.
+     */
+    @Test
+    public void save_should_save_new_category_with_sub_category_test() throws Exception {
+        long parentCategoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_2' AND is_archived IS FALSE", Long.class);
+
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .parentCategoryId(parentCategoryId)
+                .name("sub_category_2")
+                .build();
+
+        mockMvc.perform(post(urlEndpoint())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(rq)))
+                .andExpect(status().isCreated());
+
+        Long updatedParentCategoryId = jdbcTemplate.queryForObject("SELECT parent_category_id FROM tools_category WHERE name = 'sub_category_2' AND is_archived IS FALSE", Long.class);
+        assertEquals(parentCategoryId, updatedParentCategoryId);
+    }
+
+    /**
      * {@link CategoryController#save(CategoryRequest)} should not save {@link Category} object if brnad already exists in database.
      * Test sends request to create new category with already existing category name in database.
      * Then checks if controller response with bad request.
      */
     @Test
     public void save_should_not_save_if_category_exists_test() throws Exception {
-        CategoryRequest rq = new CategoryRequest("category_1", false);
+        CategoryRequest rq =getDefaultCategoryRequest()
+                .name("category_1")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -528,7 +624,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_null_test() throws Exception {
-        CategoryRequest rq = new CategoryRequest(null, false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name(null)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -543,7 +641,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_empty_test() throws Exception {
-        CategoryRequest rq = new CategoryRequest("", false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name("")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -558,7 +658,9 @@ public class CategoryControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_blank_test() throws Exception {
-        CategoryRequest rq = new CategoryRequest("  ", false);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name("   ")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -573,7 +675,10 @@ public class CategoryControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_is_archived_null_test() throws Exception {
-        CategoryRequest rq = new CategoryRequest("HandTool", null);
+        CategoryRequest rq = getDefaultCategoryRequest()
+                .name("HandTool")
+                .isArchived(null)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)

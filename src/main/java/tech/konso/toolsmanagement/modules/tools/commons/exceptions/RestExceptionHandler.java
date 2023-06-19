@@ -59,7 +59,7 @@ public class RestExceptionHandler {
                 .collect(Collectors.joining(", "));
 
         return ResponseEntity
-                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("detail", errors)
                 .build();

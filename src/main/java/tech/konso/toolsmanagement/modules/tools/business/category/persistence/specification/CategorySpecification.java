@@ -43,6 +43,23 @@ public final class CategorySpecification {
     }
 
     /**
+     * Specification to determine if the category is parent or not.
+     * If a category does not have a link to a parent category, then it is considered a parent category.
+     *
+     * @param isParent flag
+     * @return created specification
+     */
+    public static Specification<Category> isParentSpec(boolean isParent) {
+        if (isParent) {
+            return (root, criteriaQuery, criteriaBuilder) ->
+                criteriaBuilder.isNull(root.get(Category_.PARENT_CATEGORY));
+        } else {
+            return (root, criteriaQuery, criteriaBuilder) ->
+                    criteriaBuilder.isNotNull(root.get(Category_.PARENT_CATEGORY));
+        }
+    }
+
+    /**
      * Specification for sorting categories.
      * Support sorting by name, create date, update date.
      * For every filter supports asc and desc order.

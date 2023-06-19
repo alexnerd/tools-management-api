@@ -1,7 +1,6 @@
 package tech.konso.toolsmanagement.modules.tools.business.category.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
 
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
 
 @Schema(description = "Response for return result set of categories in pageable format")
 public record CategoryFilterResponse(@Schema(description = "list of found categories, list size limited by page size")
-                                     List<Category> categories,
+                                     List<CategoryInfo> categories,
                                      @Schema(description = "total number of categories found", example = "20")
                                      Long totalItems) {
 }
