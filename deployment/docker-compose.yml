@@ -23,7 +23,9 @@ services:
     depends_on:
       - postgres
   tools:
-    build: .
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
     container_name: tools-management-api
     environment:
       DATABASE_PASSWORD: SuperSecret
