@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: tools_management_user
       POSTGRES_DB: tools_management
     healthcheck:
-      test: [ "CMD", "pg_isready", "-q"]
+      test: [ "CMD", "pg_isready", "-q", "-U", "tools_management_user", "-d", "tools_management"]
       interval: 5s
       timeout: 1s
       retries: 3
