@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 1m
+
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 1m
+    metrics_path: "/tools-management-api/actuator/prometheus"
+    static_configs:
+      - targets: ['tools:8080']

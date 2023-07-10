@@ -13,6 +13,7 @@ services:
       interval: 5s
       timeout: 1s
       retries: 3
+
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4:7.1
@@ -32,6 +33,7 @@ services:
       - ./pgpass:/pgpass
     depends_on:
       - postgres
+
   tools:
     build:
       context: ..
@@ -51,5 +53,27 @@ services:
       - "4545:4545"
     depends_on:
       postgres:
+        condition: service_healthy
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    healthcheck:
+      test: [ "CMD", "wget", "-O", "-", "http://localhost:9090/graph"]
+      interval: 5s
+      timeout: 1s
+      retries: 3
+    ports:
+      - "9090:9090"
+    depends_on:
+      tools:
         condition: service_healthy
 
