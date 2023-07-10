@@ -8,6 +8,11 @@ services:
       POSTGRES_PASSWORD: SuperSecret
       POSTGRES_USER: tools_management_user
       POSTGRES_DB: tools_management
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q"]
+      interval: 5s
+      timeout: 1s
+      retries: 3
   pgadmin:
     container_name: pgadmin
     image: dpage/pgadmin4:7.1
@@ -15,6 +20,11 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: SuperSecret
+    healthcheck:
+      test: ["CMD", "wget", "-O", "-", "http://localhost:80/misc/ping"]
+      interval: 5s
+      timeout: 1s
+      retries: 3
     ports:
       - "5050:80"
     volumes:
@@ -31,9 +41,15 @@ services:
       DATABASE_PASSWORD: SuperSecret
       DATABASE_USER: tools_management_user
       DATABASE_URL: "jdbc:postgresql://postgres:5432/tools_management"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/tools-management-api/actuator/health"]
+      interval: 5s
+      timeout: 1s
+      retries: 3
     ports:
       - "8080:8080"
       - "4545:4545"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
