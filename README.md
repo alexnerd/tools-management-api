@@ -27,6 +27,9 @@ password: SuperSecret
 
 password for database connection: SuperSecret
 
+## Prometheus
+Prometheus available on http://localhost:9090
+
 ## Metrics
 http://localhost:8080/tools-management-api/actuator
 
