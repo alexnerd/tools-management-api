@@ -14,6 +14,8 @@ import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.speci
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
+import java.util.Optional;
+
 import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
 
 /**
@@ -80,46 +82,44 @@ public class BrandService {
     }
 
     /**
-     * Update brand by unique id. Supports updating name and archived flag.
-     * Brand to update must exist in database.
-     * Run under transaction.
-     * <p>
-     * Example:
-     * <pre>
-     *     BrandRequest rq = new BrandRequest("new_brand", true);
-     *     service.update(brandId, rq);
-     * </pre>
-     *
-     * @param id of brand, must exist in database
-     * @param rq {@link BrandRequest} object for updating brand
-     * @return {@link Brand} updated brand object
-     * @throws BPException if brand not exists in database
-     */
-    @Transactional
-    public Brand update(Long id, BrandRequest rq) {
-        Brand brand = repository.findById(id).orElseThrow(() -> new BPException("Brand not found id: " + id));
-        brand.setName(rq.name());
-        brand.setIsArchived(rq.isArchived());
-        return brand;
-    }
-
-    /**
-     * Save new brand to database.
+     * Save new brand to database or update existing.
      * Brand name must be unique and not exists in database.
      * <p>
      * Example:
      * <pre>
-     *     BrandRequest rq = new BrandRequest("new_brand", false);
+     *     BrandRequest rq = new BrandRequest(null, "new_brand", false);
      *     Brand savedBrand = service.save(rq);
      * </pre>
      *
      * @param rq {@link BrandRequest} object for creating brand
      * @return {@link Brand} saved object
      */
+    @Transactional
     public Brand save(BrandRequest rq) {
-        Brand brand = new Brand();
+        return Optional.ofNullable(rq.id())
+                .map(id -> repository.findById(rq.id())
+                        .orElseThrow(() -> new BPException("Brand not found id: " + id))
+                ).map(brand -> toEntity(brand, rq))
+                .orElseGet(() ->
+                        repository.save(toEntity(new Brand(), rq))
+                );
+    }
+
+    /**
+     * Converts {@link BrandRequest} to {@link Brand} object.
+     * <p>
+     * Example:
+     * <pre>
+     *     toEntity(new Brand(), rq);
+     * </pre>
+     *
+     * @param brand {@link Brand} object for save to database or update existing
+     * @param rq {@link BrandRequest} object for converting to {@link Brand}
+     * @return {@link Brand} saved object
+     */
+    private Brand toEntity(Brand brand, BrandRequest rq) {
         brand.setName(rq.name());
         brand.setIsArchived(rq.isArchived());
-        return repository.save(brand);
+        return brand;
     }
 }

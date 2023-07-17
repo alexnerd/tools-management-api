@@ -73,10 +73,9 @@ public class BrandController {
             @Parameter(name = "rq", description = "Request body fo update brand", required = true,
                     schema = @Schema(implementation = BrandRequest.class))
     })
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> update(@PathVariable("id") Long id,
-                                       @Valid @RequestBody BrandRequest rq) {
-        service.update(id, rq);
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> update(@Valid @RequestBody BrandRequest rq) {
+        service.save(rq);
         return ResponseEntity.noContent().build();
     }
 

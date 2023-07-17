@@ -61,6 +61,13 @@ public class BrandServiceTest {
         jdbcTemplate.update("DELETE FROM tools_brand");
     }
 
+    private BrandRequest.BrandRequestBuilder getDefaultBrandRequest() {
+        return BrandRequest.builder()
+                .id(null)
+                .name("MAKITA")
+                .isArchived(false);
+    }
+
     /**
      * {@link BrandService#findById(Long)} should return {@link Brand} by id from database.
      * Test checks equality brandId (received from jdbcTemplate request)
@@ -89,71 +96,83 @@ public class BrandServiceTest {
     }
 
     /**
-     * {@link BrandService#update(Long, BrandRequest)} should update {@link Brand} name field.
+     * {@link BrandService#save(BrandRequest)} should update {@link Brand} name field.
      * Test finds existing brand id in database with jdbcTemplate and try to update it name
-     * using {@link BrandService#update(Long, BrandRequest)}.
+     * using {@link BrandService#save(BrandRequest)}.
      * Then checks if name was updated or not (by compare {@link BrandRequest} name and brandName received from database).
      */
     @Test
-    public void update_should_update_brand_name_test() {
+    public void save_should_update_brand_name_test() {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest("new_brand", false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .name("new_brand")
+                .build();
 
-        service.update(brandId, rq);
+        service.save(rq);
 
         String brandName = jdbcTemplate.queryForObject("SELECT name FROM tools_brand WHERE brand_id = " + brandId + " AND is_archived IS FALSE", String.class);
         assertEquals(rq.name(), brandName);
     }
 
     /**
-     * {@link BrandService#update(Long, BrandRequest)} should update {@link Brand} isArchived field.
+     * {@link BrandService#save(BrandRequest)} should update {@link Brand} isArchived field.
      * Test finds existing brand id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link BrandService#update(Long, BrandRequest)}.
+     * using {@link BrandService#save(BrandRequest)}.
      * Then checks if isArchived flag was updated or not (using assertTrue on field).
      */
     @Test
-    public void update_should_archive_brand_test() {
+    public void save_should_archive_brand_test() {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest("new_brand", true);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .isArchived(true)
+                .build();
 
-        service.update(brandId, rq);
+        service.save(rq);
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_brand WHERE brand_id = " + brandId, Boolean.class);
         assertTrue(isArchived);
     }
 
     /**
-     * {@link BrandService#update(Long, BrandRequest)} should not update {@link Brand} if name field is null.
+     * {@link BrandService#save(BrandRequest)} should not update {@link Brand} if name field is null.
      * Test finds existing brand id in database with jdbcTemplate and try to update it name field
-     * using {@link BrandService#update(Long, BrandRequest)}.
+     * using {@link BrandService#save(BrandRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if field name not changed during test.
      */
     @Test
-    public void update_should_not_update_null_name_test() {
+    public void save_should_not_update_null_name_test() {
         String brandName = "brand_1";
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = '" + brandName + "' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest(null, false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .name(null)
+                .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(brandId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         String brandNameFromDb = jdbcTemplate.queryForObject("SELECT name FROM tools_brand WHERE brand_id = " + brandId + " AND is_archived IS FALSE", String.class);
         assertEquals(brandName, brandNameFromDb);
     }
 
     /**
-     * {@link BrandService#update(Long, BrandRequest)} should not update {@link Brand} if isArchived flag is null.
+     * {@link BrandService#save(BrandRequest)} should not update {@link Brand} if isArchived flag is null.
      * Test finds existing brand id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link BrandService#update(Long, BrandRequest)}.
+     * using {@link BrandService#save(BrandRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if isArchived flag not changed during test.
      */
     @Test
-    public void update_should_not_update_null_isArchived_test() {
+    public void save_should_not_update_null_isArchived_test() {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest("new_brand", null);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .isArchived(null)
+                .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(brandId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_brand WHERE brand_id = " + brandId, Boolean.class);
         assertFalse(isArchived);
@@ -168,7 +187,9 @@ public class BrandServiceTest {
      */
     @Test
     public void save_should_save_brand_test() {
-        BrandRequest rq = new BrandRequest("new_brand", false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .name("new_brand")
+                .build();
 
         Brand savedBrand = service.save(rq);
 
@@ -186,7 +207,9 @@ public class BrandServiceTest {
     @Test
     public void save_should_not_save_if_brand_name_already_exists_test() {
         String brandName = "brand_1";
-        BrandRequest rq = new BrandRequest(brandName, false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .name(brandName)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
@@ -201,7 +224,9 @@ public class BrandServiceTest {
      */
     @Test
     public void save_should_not_save_if_brand_name_is_null_exists_test() {
-        BrandRequest rq = new BrandRequest(null, false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .name(null)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 

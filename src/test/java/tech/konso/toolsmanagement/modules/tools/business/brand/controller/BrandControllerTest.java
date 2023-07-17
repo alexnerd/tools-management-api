@@ -59,6 +59,13 @@ public class BrandControllerTest extends AbstractControllerTest {
         return url + "/v1/tools/brands";
     }
 
+    private BrandRequest.BrandRequestBuilder getDefaultBrandRequest() {
+        return BrandRequest.builder()
+                .id(null)
+                .name("MAKITA")
+                .isArchived(false);
+    }
+
 
     /**
      * {@link BrandController#find(Long)} should return {@link Brand} by id from database.
@@ -358,7 +365,7 @@ public class BrandControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link BrandController#update(Long, BrandRequest)}  should update {@link Brand} name field.
+     * {@link BrandController#update(BrandRequest)}  should update {@link Brand} name field.
      * Test finds existing brand id in database with jdbcTemplate.
      * Then send request for update brand name by id.
      * Then checks if name was updated or not (by compare {@link BrandRequest} name and brandName received from database).
@@ -366,9 +373,11 @@ public class BrandControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_update_brand_name_test() throws Exception {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest("MAKITA", false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + brandId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -378,7 +387,7 @@ public class BrandControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link BrandController#update(Long, BrandRequest)} should update {@link Brand} isArchived flag.
+     * {@link BrandController#update(BrandRequest)} should update {@link Brand} isArchived flag.
      * Test finds existing brand id in database with jdbcTemplate.
      * Then send request for update isArchived flag by id.
      * Then checks if isArchived was updated or not (by compare {@link BrandRequest} isArchived flag and flag received from database).
@@ -386,9 +395,12 @@ public class BrandControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_update_brand_is_archived_test() throws Exception {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest("brand_1", true);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .isArchived(true)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + brandId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -398,7 +410,7 @@ public class BrandControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link BrandController#update(Long, BrandRequest)} should return bad request with null brand name.
+     * {@link BrandController#update(BrandRequest)} should return bad request with null brand name.
      * Test finds existing brand id in database with jdbcTemplate.
      * Then send request for update by id with null brand name.
      * Then checks if controller response with bad request.
@@ -406,16 +418,20 @@ public class BrandControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_null_name_test() throws Exception {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest(null, true);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .name(null)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + brandId)
+
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link BrandController#update(Long, BrandRequest)} should return bad request with blank brand name.
+     * {@link BrandController#update(BrandRequest)} should return bad request with blank brand name.
      * Test finds existing brand id in database with jdbcTemplate.
      * Then send request for update by id with blank brand name.
      * Then checks if controller response with bad request.
@@ -423,16 +439,20 @@ public class BrandControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_blank_name_test() throws Exception {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest(" ", true);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .name("  ")
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + brandId)
+
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link BrandController#update(Long, BrandRequest)} should return bad request with empty brand name.
+     * {@link BrandController#update(BrandRequest)} should return bad request with empty brand name.
      * Test finds existing brand id in database with jdbcTemplate.
      * Then send request for update by id with empty brand name.
      * Then checks if controller response with bad request.
@@ -440,16 +460,20 @@ public class BrandControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_empty_name_test() throws Exception {
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest("", true);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .name("")
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + brandId)
+
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link BrandController#update(Long, BrandRequest)} should return bad request if brand name already exists in database.
+     * {@link BrandController#update(BrandRequest)} should return bad request if brand name already exists in database.
      * Test finds existing brand name in database with jdbcTemplate.
      * Then finds another brand by id with different in database with jdbcTemplate.
      * Then send request for update by id with existing brand name.
@@ -459,24 +483,30 @@ public class BrandControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_existing_name_test() throws Exception {
         String existingBrandName = jdbcTemplate.queryForObject("SELECT name FROM tools_brand WHERE name = 'brand_1' AND is_archived IS FALSE", String.class);
         long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_2' AND is_archived IS FALSE", Long.class);
-        BrandRequest rq = new BrandRequest(existingBrandName, false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(brandId)
+                .name(existingBrandName)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + brandId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link BrandController#update(Long, BrandRequest)} should return bad request if brand with searching id not exist in database.
+     * {@link BrandController#update(BrandRequest)} should return bad request if brand with searching id not exist in database.
      * Test send request for update by not existing id.
      * Then checks if controller response with bad request.
      */
     @Test
     public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
-        BrandRequest rq = new BrandRequest("MAKITA", true);
+        BrandRequest rq = getDefaultBrandRequest()
+                .id(Long.valueOf(-1))
+                .name("MAKITA")
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/-1")
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
@@ -491,18 +521,18 @@ public class BrandControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_save_new_brand_test() throws Exception {
-        String brandName = "MAKITA";
-        Long countBrands = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_brand WHERE name = '" + brandName + "' AND is_archived IS FALSE", Long.class);
+        BrandRequest rq = getDefaultBrandRequest()
+                .build();
+        Long countBrands = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_brand WHERE name = '" + rq.name() + "' AND is_archived IS FALSE", Long.class);
         assertEquals(0, countBrands);
 
-        BrandRequest rq = new BrandRequest(brandName, false);
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isCreated());
 
-        Long countSavedBrands = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_brand WHERE name = '" + brandName + "' AND is_archived IS FALSE", Long.class);
+        Long countSavedBrands = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_brand WHERE name = '" + rq.name() + "' AND is_archived IS FALSE", Long.class);
         assertEquals(1L, countSavedBrands);
     }
 
@@ -513,7 +543,9 @@ public class BrandControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_brand_exists_test() throws Exception {
-        BrandRequest rq = new BrandRequest("brand_1", false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .name("brand_1")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -528,7 +560,9 @@ public class BrandControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_null_test() throws Exception {
-        BrandRequest rq = new BrandRequest(null, false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .name(null)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -543,7 +577,9 @@ public class BrandControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_empty_test() throws Exception {
-        BrandRequest rq = new BrandRequest("", false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .name("")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -558,7 +594,9 @@ public class BrandControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_blank_test() throws Exception {
-        BrandRequest rq = new BrandRequest("  ", false);
+        BrandRequest rq = getDefaultBrandRequest()
+                .name("  ")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -573,7 +611,9 @@ public class BrandControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_is_archived_null_test() throws Exception {
-        BrandRequest rq = new BrandRequest("MAKITA", null);
+        BrandRequest rq = getDefaultBrandRequest()
+                .isArchived(null)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
