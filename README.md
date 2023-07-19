@@ -30,6 +30,13 @@ password for database connection: SuperSecret
 ## Prometheus
 Prometheus available on http://localhost:9090
 
+## Grafana
+Grafana available on http://localhost:3000
+
+login: admin
+
+password: SuperSecret
+
 ## Metrics
 http://localhost:8080/tools-management-api/actuator
 

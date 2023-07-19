@@ -76,4 +76,18 @@ services:
     depends_on:
       tools:
         condition: service_healthy
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: SuperSecret
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards-json:/var/lib/grafana/dashboards
+    depends_on:
+      prometheus:
+        condition: service_healthy
 
