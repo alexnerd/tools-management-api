@@ -14,6 +14,8 @@ import tech.konso.toolsmanagement.modules.tools.business.label.persistence.speci
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
+import java.util.Optional;
+
 import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
 
 /**
@@ -80,46 +82,44 @@ public class LabelService {
     }
 
     /**
-     * Update label by unique id. Supports updating name and archived flag.
-     * Label to update must exist in database.
-     * Run under transaction.
-     * <p>
-     * Example:
-     * <pre>
-     *     LabelRequest rq = new LabelRequest("new_label", true);
-     *     service.update(labelId, rq);
-     * </pre>
-     *
-     * @param id of label, must exist in database
-     * @param rq {@link LabelRequest} object for updating label
-     * @return {@link Label} updated label object
-     * @throws BPException if label not exists in database
-     */
-    @Transactional
-    public Label update(Long id, LabelRequest rq) {
-        Label label = repository.findById(id).orElseThrow(() -> new BPException("Label not found id: " + id));
-        label.setName(rq.name());
-        label.setIsArchived(rq.isArchived());
-        return label;
-    }
-
-    /**
-     * Save new label to database.
+     * Save new label to database or update existing.
      * Label name must be unique and not exists in database.
      * <p>
      * Example:
      * <pre>
-     *     LabelRequest rq = new LabelRequest("new_label", false);
+     *     LabelRequest rq = new LabelRequest(null, "new_label", false);
      *     Label savedLabel = service.save(rq);
      * </pre>
      *
      * @param rq {@link LabelRequest} object for creating label
      * @return {@link Label} saved object
      */
+    @Transactional
     public Label save(LabelRequest rq) {
-        Label label = new Label();
+        return Optional.ofNullable(rq.id())
+                .map(id -> repository.findById(rq.id())
+                        .orElseThrow(() -> new BPException("Label not found id: " + id))
+                ).map(label -> toEntity(label, rq))
+                .orElseGet(() ->
+                        repository.save(toEntity(new Label(), rq))
+                );
+    }
+
+    /**
+     * Converts {@link LabelRequest} to {@link Label} object.
+     * <p>
+     * Example:
+     * <pre>
+     *     toEntity(new Label(), rq);
+     * </pre>
+     *
+     * @param label {@link Label} object for save to database or update existing
+     * @param rq {@link LabelRequest} object for converting to {@link Label}
+     * @return {@link Label} saved object
+     */
+    private Label toEntity(Label label, LabelRequest rq) {
         label.setName(rq.name());
         label.setIsArchived(rq.isArchived());
-        return repository.save(label);
+        return label;
     }
 }

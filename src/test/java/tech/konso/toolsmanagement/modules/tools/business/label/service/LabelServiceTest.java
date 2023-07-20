@@ -61,6 +61,13 @@ public class LabelServiceTest {
         jdbcTemplate.update("DELETE FROM tools_label");
     }
 
+    private LabelRequest.LabelRequestBuilder getDefaultLabelRequest() {
+        return LabelRequest.builder()
+                .id(null)
+                .name("Important")
+                .isArchived(false);
+    }
+
     /**
      * {@link LabelService#findById(Long)} should return {@link Label} by id from database.
      * Test checks equality labelId (received from jdbcTemplate request)
@@ -89,43 +96,48 @@ public class LabelServiceTest {
     }
 
     /**
-     * {@link LabelService#update(Long, LabelRequest)} should update {@link Label} name field.
+     * {@link LabelService#save(LabelRequest)} should update {@link Label} name field.
      * Test finds existing label id in database with jdbcTemplate and try to update it name
-     * using {@link LabelService#update(Long, LabelRequest)}.
+     * using {@link LabelService#save(LabelRequest)}.
      * Then checks if name was updated or not (by compare {@link LabelRequest} name and labelName received from database).
      */
     @Test
     public void update_should_update_label_name_test() {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest("new_label", false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .build();
 
-        service.update(labelId, rq);
+        service.save(rq);
 
         String labelName = jdbcTemplate.queryForObject("SELECT name FROM tools_label WHERE label_id = " + labelId + " AND is_archived IS FALSE", String.class);
         assertEquals(rq.name(), labelName);
     }
 
     /**
-     * {@link LabelService#update(Long, LabelRequest)} should update {@link Label} isArchived field.
+     * {@link LabelService#save(LabelRequest)} should update {@link Label} isArchived field.
      * Test finds existing label id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link LabelService#update(Long, LabelRequest)}.
+     * using {@link LabelService#save(LabelRequest)}.
      * Then checks if isArchived flag was updated or not (using assertTrue on field).
      */
     @Test
     public void update_should_archive_label_test() {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest("new_label", true);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .isArchived(true)
+                .build();
 
-        service.update(labelId, rq);
+        service.save(rq);
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_label WHERE label_id = " + labelId, Boolean.class);
         assertTrue(isArchived);
     }
 
     /**
-     * {@link LabelService#update(Long, LabelRequest)} should not update {@link Label} if name field is null.
+     * {@link LabelService#save(LabelRequest)} should not update {@link Label} if name field is null.
      * Test finds existing label id in database with jdbcTemplate and try to update it name field
-     * using {@link LabelService#update(Long, LabelRequest)}.
+     * using {@link LabelService#save(LabelRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if field name not changed during test.
      */
@@ -133,27 +145,33 @@ public class LabelServiceTest {
     public void update_should_not_update_null_name_test() {
         String labelName = "label_1";
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = '" + labelName + "' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest(null, false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .name(null)
+                .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(labelId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         String labelNameFromDb = jdbcTemplate.queryForObject("SELECT name FROM tools_label WHERE label_id = " + labelId + " AND is_archived IS FALSE", String.class);
         assertEquals(labelName, labelNameFromDb);
     }
 
     /**
-     * {@link LabelService#update(Long, LabelRequest)} should not update {@link Label} if isArchived flag is null.
+     * {@link LabelService#save(LabelRequest)} should not update {@link Label} if isArchived flag is null.
      * Test finds existing label id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link LabelService#update(Long, LabelRequest)}.
+     * using {@link LabelService#save(LabelRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if isArchived flag not changed during test.
      */
     @Test
     public void update_should_not_update_null_isArchived_test() {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest("new_label", null);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .isArchived(null)
+                .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(labelId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_label WHERE label_id = " + labelId, Boolean.class);
         assertFalse(isArchived);
@@ -168,7 +186,7 @@ public class LabelServiceTest {
      */
     @Test
     public void save_should_save_label_test() {
-        LabelRequest rq = new LabelRequest("new_label", false);
+        LabelRequest rq = getDefaultLabelRequest().build();
 
         Label savedLabel = service.save(rq);
 
@@ -186,7 +204,9 @@ public class LabelServiceTest {
     @Test
     public void save_should_not_save_if_label_name_already_exists_test() {
         String labelName = "label_1";
-        LabelRequest rq = new LabelRequest(labelName, false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .name(labelName)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
@@ -201,7 +221,9 @@ public class LabelServiceTest {
      */
     @Test
     public void save_should_not_save_if_label_name_is_null_exists_test() {
-        LabelRequest rq = new LabelRequest(null, false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .name(null)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 

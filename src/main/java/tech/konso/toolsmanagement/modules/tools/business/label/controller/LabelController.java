@@ -74,10 +74,9 @@ public class LabelController {
             @Parameter(name = "rq", description = "Request body fo update label", required = true,
                     schema = @Schema(implementation = LabelRequest.class))
     })
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> update(@PathVariable("id") Long id,
-                                       @Valid @RequestBody LabelRequest rq) {
-        service.update(id, rq);
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> update(@Valid @RequestBody LabelRequest rq) {
+        service.save(rq);
         return ResponseEntity.noContent().build();
     }
 

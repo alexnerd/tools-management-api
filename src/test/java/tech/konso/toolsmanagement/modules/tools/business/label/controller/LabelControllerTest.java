@@ -59,6 +59,13 @@ public class LabelControllerTest extends AbstractControllerTest {
         return url + "/v1/tools/labels";
     }
 
+    private LabelRequest.LabelRequestBuilder getDefaultLabelRequest() {
+        return LabelRequest.builder()
+                .id(null)
+                .name("Important")
+                .isArchived(false);
+    }
+
 
     /**
      * {@link LabelController#find(Long)} should return {@link Label} by id from database.
@@ -358,7 +365,7 @@ public class LabelControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link LabelController#update(Long, LabelRequest)}  should update {@link Label} name field.
+     * {@link LabelController#update(LabelRequest)}  should update {@link Label} name field.
      * Test finds existing label id in database with jdbcTemplate.
      * Then send request for update label name by id.
      * Then checks if name was updated or not (by compare {@link LabelRequest} name and labelName received from database).
@@ -366,9 +373,11 @@ public class LabelControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_update_label_name_test() throws Exception {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest("Important", false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + labelId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -378,7 +387,7 @@ public class LabelControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link LabelController#update(Long, LabelRequest)} should update {@link Label} isArchived flag.
+     * {@link LabelController#update(LabelRequest)} should update {@link Label} isArchived flag.
      * Test finds existing label id in database with jdbcTemplate.
      * Then send request for update isArchived flag by id.
      * Then checks if isArchived was updated or not (by compare {@link LabelRequest} isArchived flag and flag received from database).
@@ -386,9 +395,12 @@ public class LabelControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_update_label_is_archived_test() throws Exception {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest("label_1", true);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .isArchived(true)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + labelId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -398,7 +410,7 @@ public class LabelControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link LabelController#update(Long, LabelRequest)} should return bad request with null label name.
+     * {@link LabelController#update(LabelRequest)} should return bad request with null label name.
      * Test finds existing label id in database with jdbcTemplate.
      * Then send request for update by id with null label name.
      * Then checks if controller response with bad request.
@@ -406,16 +418,19 @@ public class LabelControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_null_name_test() throws Exception {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest(null, true);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .name(null)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + labelId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link LabelController#update(Long, LabelRequest)} should return bad request with blank label name.
+     * {@link LabelController#update(LabelRequest)} should return bad request with blank label name.
      * Test finds existing label id in database with jdbcTemplate.
      * Then send request for update by id with blank label name.
      * Then checks if controller response with bad request.
@@ -423,16 +438,19 @@ public class LabelControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_blank_name_test() throws Exception {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest(" ", true);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .name("  ")
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + labelId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link LabelController#update(Long, LabelRequest)} should return bad request with empty label name.
+     * {@link LabelController#update(LabelRequest)} should return bad request with empty label name.
      * Test finds existing label id in database with jdbcTemplate.
      * Then send request for update by id with empty label name.
      * Then checks if controller response with bad request.
@@ -440,16 +458,19 @@ public class LabelControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_empty_name_test() throws Exception {
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest("", true);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .name("")
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + labelId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link LabelController#update(Long, LabelRequest)} should return bad request if label name already exists in database.
+     * {@link LabelController#update(LabelRequest)} should return bad request if label name already exists in database.
      * Test finds existing label name in database with jdbcTemplate.
      * Then finds another label by id with different in database with jdbcTemplate.
      * Then send request for update by id with existing label name.
@@ -459,24 +480,30 @@ public class LabelControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_existing_name_test() throws Exception {
         String existingLabelName = jdbcTemplate.queryForObject("SELECT name FROM tools_label WHERE name = 'label_1' AND is_archived IS FALSE", String.class);
         long labelId = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_2' AND is_archived IS FALSE", Long.class);
-        LabelRequest rq = new LabelRequest(existingLabelName, false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(labelId)
+                .name(existingLabelName)
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + labelId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link LabelController#update(Long, LabelRequest)} should return bad request if label with searching id not exist in database.
+     * {@link LabelController#update(LabelRequest)} should return bad request if label with searching id not exist in database.
      * Test send request for update by not existing id.
      * Then checks if controller response with bad request.
      */
     @Test
     public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
-        LabelRequest rq = new LabelRequest("Important", true);
+        LabelRequest rq = getDefaultLabelRequest()
+                .id(-1L)
+                .name("test")
+                .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/-1")
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
@@ -495,7 +522,9 @@ public class LabelControllerTest extends AbstractControllerTest {
         Long countLabels = jdbcTemplate.queryForObject("SELECT count(*) FROM tools_label WHERE name = '" + labelName + "' AND is_archived IS FALSE", Long.class);
         assertEquals(0, countLabels);
 
-        LabelRequest rq = new LabelRequest(labelName, false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .name(labelName)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -513,7 +542,9 @@ public class LabelControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_label_exists_test() throws Exception {
-        LabelRequest rq = new LabelRequest("label_1", false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .name("label_1")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -528,7 +559,9 @@ public class LabelControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_null_test() throws Exception {
-        LabelRequest rq = new LabelRequest(null, false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .name(null)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -543,7 +576,9 @@ public class LabelControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_empty_test() throws Exception {
-        LabelRequest rq = new LabelRequest("", false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .name("")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -558,7 +593,9 @@ public class LabelControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_name_blank_test() throws Exception {
-        LabelRequest rq = new LabelRequest("  ", false);
+        LabelRequest rq = getDefaultLabelRequest()
+                .name("   ")
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -573,7 +610,9 @@ public class LabelControllerTest extends AbstractControllerTest {
      */
     @Test
     public void save_should_not_save_if_is_archived_null_test() throws Exception {
-        LabelRequest rq = new LabelRequest("Important", null);
+        LabelRequest rq = getDefaultLabelRequest()
+                .isArchived(null)
+                .build();
 
         mockMvc.perform(post(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)

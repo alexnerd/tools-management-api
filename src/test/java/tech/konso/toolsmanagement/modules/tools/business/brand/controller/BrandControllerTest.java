@@ -502,7 +502,7 @@ public class BrandControllerTest extends AbstractControllerTest {
     @Test
     public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
         BrandRequest rq = getDefaultBrandRequest()
-                .id(Long.valueOf(-1))
+                .id(-1L)
                 .name("MAKITA")
                 .build();
 
