@@ -69,7 +69,6 @@ public class BrandController {
 
     @Operation(summary = "Update existing brand by id")
     @Parameters({
-            @Parameter(name = "id", description = "id of brand to be updated", example = "7", required = true),
             @Parameter(name = "rq", description = "Request body fo update brand", required = true,
                     schema = @Schema(implementation = BrandRequest.class))
     })

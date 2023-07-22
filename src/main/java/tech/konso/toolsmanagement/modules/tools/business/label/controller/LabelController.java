@@ -70,7 +70,6 @@ public class LabelController {
 
     @Operation(summary = "Update existing label by id")
     @Parameters({
-            @Parameter(name ="id", description = "id of label to be updated", example = "7", required = true),
             @Parameter(name = "rq", description = "Request body fo update label", required = true,
                     schema = @Schema(implementation = LabelRequest.class))
     })
