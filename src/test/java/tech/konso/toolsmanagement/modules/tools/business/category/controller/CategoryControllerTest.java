@@ -67,7 +67,6 @@ public class CategoryControllerTest extends AbstractControllerTest {
         return CategoryRequest.builder()
                 .name("category_1")
                 .isArchived(false);
-
     }
 
 
@@ -391,7 +390,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)}  should update {@link Category} name field.
+     * {@link CategoryController#update(CategoryRequest)}  should update {@link Category} name field.
      * Test finds existing category id in database with jdbcTemplate.
      * Then send request for update category name by id.
      * Then checks if name was updated or not (by compare {@link CategoryRequest} name and categoryName received from database).
@@ -400,10 +399,11 @@ public class CategoryControllerTest extends AbstractControllerTest {
     public void update_should_update_category_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .name("HandTool")
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -413,7 +413,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)} should update {@link Category} isArchived flag.
+     * {@link CategoryController#update(CategoryRequest)} should update {@link Category} isArchived flag.
      * Test finds existing category id in database with jdbcTemplate.
      * Then send request for update isArchived flag by id.
      * Then checks if isArchived was updated or not (by compare {@link CategoryRequest} isArchived flag and flag received from database).
@@ -422,10 +422,11 @@ public class CategoryControllerTest extends AbstractControllerTest {
     public void update_should_update_category_is_archived_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .isArchived(true)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -435,7 +436,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)} should return bad request with empty category name.
+     * {@link CategoryController#update(CategoryRequest)} should return bad request with empty category name.
      * Test finds existing category id in database with jdbcTemplate.
      * Then send request for update by id with empty category name.
      * Then checks if controller response with bad request.
@@ -444,17 +445,18 @@ public class CategoryControllerTest extends AbstractControllerTest {
     public void update_should_should_return_bad_request_if_parent_category_id_equals_current_category_id_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .parentCategoryId(categoryId)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)} should return bad request with null category name.
+     * {@link CategoryController#update(CategoryRequest)} should return bad request with null category name.
      * Test finds existing category id in database with jdbcTemplate.
      * Then send request for update by id with null category name.
      * Then checks if controller response with bad request.
@@ -463,17 +465,18 @@ public class CategoryControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_null_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .name(null)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)} should return bad request with blank category name.
+     * {@link CategoryController#update(CategoryRequest)} should return bad request with blank category name.
      * Test finds existing category id in database with jdbcTemplate.
      * Then send request for update by id with blank category name.
      * Then checks if controller response with bad request.
@@ -482,17 +485,18 @@ public class CategoryControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_blank_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .name("   ")
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)} should return bad request with empty category name.
+     * {@link CategoryController#update(CategoryRequest)} should return bad request with empty category name.
      * Test finds existing category id in database with jdbcTemplate.
      * Then send request for update by id with empty category name.
      * Then checks if controller response with bad request.
@@ -501,17 +505,18 @@ public class CategoryControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_empty_name_test() throws Exception {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .name("")
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)} should return bad request if category name already exists in database.
+     * {@link CategoryController#update(CategoryRequest)} should return bad request if category name already exists in database.
      * Test finds existing category name in database with jdbcTemplate.
      * Then finds another category by id with different in database with jdbcTemplate.
      * Then send request for update by id with existing category name.
@@ -522,28 +527,30 @@ public class CategoryControllerTest extends AbstractControllerTest {
         String existingCategoryName = jdbcTemplate.queryForObject("SELECT name FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", String.class);
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_2' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .name(existingCategoryName)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + categoryId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link CategoryController#update(Long, CategoryRequest)} should return bad request if category with searching id not exist in database.
+     * {@link CategoryController#update(CategoryRequest)} should return bad request if category with searching id not exist in database.
      * Test send request for update by not existing id.
      * Then checks if controller response with bad request.
      */
     @Test
     public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(-1L)
                 .name("HandTool")
                 .isArchived(true)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/-1")
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());

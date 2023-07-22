@@ -18,6 +18,8 @@ import tech.konso.toolsmanagement.modules.tools.business.category.service.mapper
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
+import java.util.Optional;
+
 import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
 
 /**
@@ -95,45 +97,12 @@ public class CategoryService {
     }
 
     /**
-     * Update category by unique id. Supports updating name , parent category and archived flag.
-     * If category become archived then it's subcategories become archived too.
+     * Save new category to database or update existing.
+     * Category name must be unique and not exists in database.
+     * If category to update become archived then it's subcategories become archived too.
      * Category to update must exist in database.
      * Category id and parent category id must not be the same.
      * Run under transaction.
-     * <p>
-     * Example:
-     * <pre>
-     *     CategoryRequest rq = new CategoryRequest("new_category", 1, true);
-     *     service.update(categoryId, rq);
-     * </pre>
-     *
-     * @param id of category, must exist in database
-     * @param rq {@link CategoryRequest} object for updating category
-     * @return {@link Category} updated category object
-     * @throws BPException if category not exists in database
-     */
-    @Transactional
-    public Category update(Long id, CategoryRequest rq) {
-        if (id.equals(rq.parentCategoryId())){
-            throw new BPException("Category id and parent category id must not be the same, id: " + id);
-        }
-        Category category = repository.findById(id).orElseThrow(() -> new BPException("Category not found id: " + id));
-        category.setName(rq.name());
-        category.setParentCategory(
-                rq.parentCategoryId() == null ? null : repository.getReferenceById(rq.parentCategoryId())
-        );
-
-        if (rq.isArchived() && !category.getIsArchived()) {
-            category.getSubcategories().forEach(child -> child.setIsArchived(true));
-        }
-        category.setIsArchived(rq.isArchived());
-
-        return category;
-    }
-
-    /**
-     * Save new category to database.
-     * Category name must be unique and not exists in database.
      * <p>
      * Example:
      * <pre>
@@ -144,13 +113,44 @@ public class CategoryService {
      * @param rq {@link CategoryRequest} object for creating category
      * @return {@link Category} saved object
      */
+    @Transactional
     public Category save(CategoryRequest rq) {
-        Category category = new Category();
+        return Optional.ofNullable(rq.id())
+                .map(id -> repository.findById(rq.id())
+                        .orElseThrow(() -> new BPException("Category not found id: " + id))
+                ).map(category -> {
+                    if (category.getId().equals(rq.parentCategoryId())) {
+                        throw new BPException("Category id and parent category id must not be the same, id: "
+                                + rq.parentCategoryId());
+                    }
+                    return toEntity(category, rq);
+                })
+                .orElseGet(() ->
+                        repository.save(toEntity(new Category(), rq))
+                );
+    }
+
+    /**
+     * Converts {@link CategoryRequest} to {@link Category} object.
+     * <p>
+     * Example:
+     * <pre>
+     *     toEntity(new Category(), rq);
+     * </pre>
+     *
+     * @param category {@link Category} object for save to database or update existing
+     * @param rq       {@link CategoryRequest} object for converting to {@link Category}
+     * @return {@link Category} saved object
+     */
+    private Category toEntity(Category category, CategoryRequest rq) {
         category.setName(rq.name());
         category.setParentCategory(
                 rq.parentCategoryId() == null ? null : repository.getReferenceById(rq.parentCategoryId())
         );
+        if (rq.isArchived() && !category.getIsArchived()) {
+            category.getSubcategories().forEach(child -> child.setIsArchived(true));
+        }
         category.setIsArchived(rq.isArchived());
-        return repository.save(category);
+        return category;
     }
 }

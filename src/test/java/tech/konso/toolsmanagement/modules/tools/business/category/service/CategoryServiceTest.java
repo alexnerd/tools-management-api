@@ -101,46 +101,48 @@ public class CategoryServiceTest {
     }
 
     /**
-     * {@link CategoryService#update(Long, CategoryRequest)} should update {@link Category} name field.
+     * {@link CategoryService#save(CategoryRequest)} should update {@link Category} name field.
      * Test finds existing category id in database with jdbcTemplate and try to update it name
-     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * using {@link CategoryService#save(CategoryRequest)}.
      * Then checks if name was updated or not (by compare {@link CategoryRequest} name and categoryName received from database).
      */
     @Test
     public void update_should_update_category_name_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .build();
 
-        service.update(categoryId, rq);
+        service.save(rq);
 
         String categoryName = jdbcTemplate.queryForObject("SELECT name FROM tools_category WHERE category_id = " + categoryId + " AND is_archived IS FALSE", String.class);
         assertEquals(rq.name(), categoryName);
     }
 
     /**
-     * {@link CategoryService#update(Long, CategoryRequest)} should update {@link Category} isArchived field.
+     * {@link CategoryService#save(CategoryRequest)} should update {@link Category} isArchived field.
      * Test finds existing category id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * using {@link CategoryService#save(CategoryRequest)}.
      * Then checks if isArchived flag was updated or not (using assertTrue on field).
      */
     @Test
     public void update_should_archive_category_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .isArchived(true)
                 .build();
 
-        service.update(categoryId, rq);
+        service.save(rq);
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_category WHERE category_id = " + categoryId, Boolean.class);
         assertTrue(isArchived);
     }
 
     /**
-     * {@link CategoryService#update(Long, CategoryRequest)} should update {@link Category} parentCategory field.
+     * {@link CategoryService#save(CategoryRequest)} should update {@link Category} parentCategory field.
      * Test finds existing category id in database with jdbcTemplate and try to update it parent category
-     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * using {@link CategoryService#save(CategoryRequest)}.
      * Then checks if parent category was updated or not (by compare {@link CategoryRequest} name and categoryName received from database).
      */
     @Test
@@ -148,19 +150,20 @@ public class CategoryServiceTest {
         long parentCategoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         long subCategoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_2' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(subCategoryId)
                 .parentCategoryId(parentCategoryId)
                 .build();
 
-        service.update(subCategoryId, rq);
+        service.save(rq);
 
         Long updatedParentCategory = jdbcTemplate.queryForObject("SELECT parent_category_id FROM tools_category WHERE category_id = " + subCategoryId + " AND is_archived IS FALSE", Long.class);
         assertEquals(rq.parentCategoryId(), updatedParentCategory);
     }
 
     /**
-     * {@link CategoryService#update(Long, CategoryRequest)} should update {@link Category} isArchived field for sub entities.
+     * {@link CategoryService#save(CategoryRequest)} should update {@link Category} isArchived field for sub entities.
      * Test finds existing category ids in database (for parent and sub entities) with jdbcTemplate and try
-     * to update it isArchived flag using {@link CategoryService#update(Long, CategoryRequest)}.
+     * to update it isArchived flag using {@link CategoryService#save(CategoryRequest)}.
      * Then checks if isArchived flag for sub entity was updated or not (using assertTrue on field).
      */
     @Test
@@ -170,19 +173,21 @@ public class CategoryServiceTest {
         jdbcTemplate.update("UPDATE tools_category SET parent_category_id = " + categoryIdParent +" WHERE category_id = " + categoryIdChild);
 
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryIdParent)
+                .parentCategoryId(categoryIdChild)
                 .isArchived(true)
                 .build();
 
-        service.update(categoryIdParent, rq);
+        service.save(rq);
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_category WHERE category_id = " + categoryIdChild, Boolean.class);
         assertTrue(isArchived);
     }
 
     /**
-     * {@link CategoryService#update(Long, CategoryRequest)} should not update {@link Category} if name field is null.
+     * {@link CategoryService#save(CategoryRequest)} should not update {@link Category} if name field is null.
      * Test finds existing category id in database with jdbcTemplate and try to update it name field
-     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * using {@link CategoryService#save(CategoryRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if field name not changed during test.
      */
@@ -191,30 +196,32 @@ public class CategoryServiceTest {
         String categoryName = "category_1";
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = '" + categoryName + "' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .name(null)
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(categoryId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         String categoryNameFromDb = jdbcTemplate.queryForObject("SELECT name FROM tools_category WHERE category_id = " + categoryId + " AND is_archived IS FALSE", String.class);
         assertEquals(categoryName, categoryNameFromDb);
     }
 
     /**
-     * {@link CategoryService#update(Long, CategoryRequest)} should not update {@link Category} if isArchived flag is null.
+     * {@link CategoryService#save(CategoryRequest)} should not update {@link Category} if isArchived flag is null.
      * Test finds existing category id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * using {@link CategoryService#save(CategoryRequest)}.
      * Then checks if isArchived flag not changed during test.
      */
     @Test
     public void update_should_not_update_null_isArchived_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .isArchived(null)
                 .build();
 
         try {
-            service.update(categoryId, rq);
+            service.save(rq);
         } catch (Exception ex) {
             //do nothing
         }
@@ -224,20 +231,21 @@ public class CategoryServiceTest {
     }
 
     /**
-     * {@link CategoryService#update(Long, CategoryRequest)} should not update {@link Category} if
+     * {@link CategoryService#save(CategoryRequest)} should not update {@link Category} if
      * parent category id and updated category id equals.
      * Test finds existing category id in database with jdbcTemplate and try to update it parent category with the same id
-     * using {@link CategoryService#update(Long, CategoryRequest)}.
+     * using {@link CategoryService#save(CategoryRequest)}.
      * Then checks if parent category not updated.
      */
     @Test
     public void update_should_not_update_parent_category_id_with_the_current_category_id_test() {
         long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1' AND is_archived IS FALSE", Long.class);
         CategoryRequest rq = getDefaultCategoryRequest()
+                .id(categoryId)
                 .parentCategoryId(categoryId)
                 .build();
 
-        assertThrows(BPException.class, () -> service.update(categoryId, rq));
+        assertThrows(BPException.class, () -> service.save(rq));
 
         Long parentCategoryId = jdbcTemplate.queryForObject("SELECT parent_category_id FROM tools_category WHERE category_id = " + categoryId, Long.class);
         assertNull(parentCategoryId);

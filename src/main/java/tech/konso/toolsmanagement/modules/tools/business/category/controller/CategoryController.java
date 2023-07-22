@@ -72,14 +72,12 @@ public class CategoryController {
 
     @Operation(summary = "Update existing category by id")
     @Parameters({
-            @Parameter(name ="id", description = "id of category to be updated", example = "7", required = true),
             @Parameter(name = "rq", description = "Request body for update category", required = true,
                     schema = @Schema(implementation = CategoryRequest.class))
     })
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> update(@PathVariable("id") Long id,
-                                       @Valid @RequestBody CategoryRequest rq) {
-        service.update(id, rq);
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> update(@Valid @RequestBody CategoryRequest rq) {
+        service.save(rq);
         return ResponseEntity.noContent().build();
     }
 
