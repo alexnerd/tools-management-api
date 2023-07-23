@@ -72,14 +72,12 @@ public class ToolController {
 
     @Operation(summary = "Update existing tool by id")
     @Parameters({
-            @Parameter(name = "id", description = "id of tool to be updated", example = "7", required = true),
             @Parameter(name = "rq", description = "Request body fo update tool", required = true,
                     schema = @Schema(implementation = ToolRequest.class))
     })
-    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> update(@PathVariable("id") Long id,
-                                       @Valid @RequestBody ToolRequest rq) {
-        service.update(id, rq);
+    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> update(@Valid @RequestBody ToolRequest rq) {
+        service.save(rq);
         return ResponseEntity.noContent().build();
     }
 

@@ -380,7 +380,7 @@ public class ToolControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)}  should update {@link Tool} name field.
+     * {@link ToolController#update(ToolRequest)}  should update {@link Tool} name field.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update tool name by id.
      * Then checks if name was updated or not (by compare {@link ToolRequest} name and toolName received from database).
@@ -389,10 +389,11 @@ public class ToolControllerTest extends AbstractControllerTest {
     public void update_should_update_tool_name_test() throws Exception {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .name("MAKITAMTK24")
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -402,7 +403,7 @@ public class ToolControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should update {@link Tool} isArchived flag.
+     * {@link ToolController#update(ToolRequest)} should update {@link Tool} isArchived flag.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update isArchived flag by id.
      * Then checks if isArchived was updated or not (by compare {@link ToolRequest} isArchived flag and flag received from database).
@@ -411,10 +412,11 @@ public class ToolControllerTest extends AbstractControllerTest {
     public void update_should_update_tool_is_archived_test() throws Exception {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .isArchived(true)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
@@ -424,7 +426,7 @@ public class ToolControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should return bad request with null tool name.
+     * {@link ToolController#update(ToolRequest)} should return bad request with null tool name.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with null tool name.
      * Then checks if controller response with bad request.
@@ -433,17 +435,18 @@ public class ToolControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_null_name_test() throws Exception {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .name(null)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should return bad request with blank tool name.
+     * {@link ToolController#update(ToolRequest)} should return bad request with blank tool name.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with blank tool name.
      * Then checks if controller response with bad request.
@@ -452,17 +455,18 @@ public class ToolControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_blank_name_test() throws Exception {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .name("  ")
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should return bad request with empty tool name.
+     * {@link ToolController#update(ToolRequest)} should return bad request with empty tool name.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with empty tool name.
      * Then checks if controller response with bad request.
@@ -471,17 +475,18 @@ public class ToolControllerTest extends AbstractControllerTest {
     public void update_should_return_bad_request_for_empty_name_test() throws Exception {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .name("")
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should return bad request if tool name already exists in database.
+     * {@link ToolController#update(ToolRequest)} should return bad request if tool name already exists in database.
      * Test finds existing tool name in database with jdbcTemplate.
      * Then finds another tool by id with different in database with jdbcTemplate.
      * Then send request for update by id with existing tool name.
@@ -492,33 +497,35 @@ public class ToolControllerTest extends AbstractControllerTest {
         String existingToolName = jdbcTemplate.queryForObject("SELECT name FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", String.class);
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_2' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .name(existingToolName)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isNoContent());
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should return bad request if tool with searching id not exist in database.
+     * {@link ToolController#update(ToolRequest)} should return bad request if tool with searching id not exist in database.
      * Test send request for update by not existing id.
      * Then checks if controller response with bad request.
      */
     @Test
     public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
         ToolRequest rq = getDefaultToolRequest()
+                .id(-1L)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/-1")
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andExpect(status().isBadRequest());
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should return unprocessable entity with null tool ownership.
+     * {@link ToolController#update(ToolRequest)} should return unprocessable entity with null tool ownership.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with null tool ownership.
      * Then checks if controller response with bad request.
@@ -527,10 +534,11 @@ public class ToolControllerTest extends AbstractControllerTest {
     public void update_should_return_unprocessable_entity_for_null_ownership_type_test() throws Exception {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .ownershipType(null)
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andDo(print())
@@ -538,7 +546,7 @@ public class ToolControllerTest extends AbstractControllerTest {
     }
 
     /**
-     * {@link ToolController#update(Long, ToolRequest)} should return unprocessable entity with unknown ownership.
+     * {@link ToolController#update(ToolRequest)} should return unprocessable entity with unknown ownership.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then send request for update by id with unknown tool ownership.
      * Then checks if controller response with bad request.
@@ -547,10 +555,11 @@ public class ToolControllerTest extends AbstractControllerTest {
     public void update_should_return_unprocessable_entity_for_unknown_ownership_type_test() throws Exception {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .ownershipType("TEST")
                 .build();
 
-        mockMvc.perform(put(urlEndpoint() + "/" + toolId)
+        mockMvc.perform(put(urlEndpoint())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(rq)))
                 .andDo(print())

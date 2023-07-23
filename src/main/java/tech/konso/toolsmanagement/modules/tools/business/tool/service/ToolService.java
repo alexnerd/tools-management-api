@@ -23,6 +23,7 @@ import tech.konso.toolsmanagement.modules.tools.business.tool.service.mappers.To
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
@@ -91,23 +92,45 @@ public class ToolService {
     }
 
     /**
-     * Update tool by unique id. Tool to update must exist in database.
+     * Save new tool to database or update existing.
      * Run under transaction.
      * <p>
      * Example:
      * <pre>
-     *     ToolRequest rq = new ToolRequest("new_tool", null, null, true);
-     *     service.update(toolId, rq);
+     *     ToolRequest rq = new ToolRequest(null, "new_tool", null, null, false);
+     *     Tool savedTool = service.save(rq);
      * </pre>
      *
-     * @param id of tool, must exist in database
-     * @param rq {@link ToolRequest} object for updating tool
-     * @return {@link Tool} updated tool object
-     * @throws BPException if tool not exists in database
+     * @param rq {@link ToolRequest} object for creating tool
+     * @return {@link Tool} saved object
      */
     @Transactional
-    public Tool update(Long id, ToolRequest rq) {
-        Tool tool = repository.findById(id).orElseThrow(() -> new BPException("Tool not found id: " + id));
+    public Tool save(ToolRequest rq) {
+        return Optional.ofNullable(rq.id())
+                .map(id -> repository.findById(rq.id())
+                        .orElseThrow(() -> new BPException("Tool not found id: " + id))
+                ).map(tool -> toEntity(tool, rq))
+                .orElseGet(() ->
+                        repository.save(toEntity(new Tool(), rq))
+                );
+    }
+
+    /**
+     * Converts {@link ToolRequest} to {@link Tool} object.
+     * <p>
+     * Example:
+     * <pre>
+     *     toEntity(new Tool(), rq);
+     * </pre>
+     *
+     * @param tool {@link Tool} object for save to database or update existing
+     * @param rq {@link ToolRequest} object for converting to {@link Tool}
+     * @return {@link Tool} saved object
+     */
+    private Tool toEntity(Tool tool, ToolRequest rq) {
+        if (tool.getId() == null) {
+            tool.setUuid(UUID.randomUUID());
+        }
         tool.setName(rq.name());
         tool.setIsConsumable(rq.isConsumable());
         tool.setInventoryNumber(rq.inventoryNumber());
@@ -126,42 +149,5 @@ public class ToolService {
 
         tool.setIsArchived(rq.isArchived());
         return tool;
-    }
-
-    /**
-     * Save new tool to database.
-     * Run under transaction.
-     * <p>
-     * Example:
-     * <pre>
-     *     ToolRequest rq = new ToolRequest("new_tool", null, null, false);
-     *     Tool savedTool = service.save(rq);
-     * </pre>
-     *
-     * @param rq {@link ToolRequest} object for creating tool
-     * @return {@link Tool} saved object
-     */
-    @Transactional
-    public Tool save(ToolRequest rq) {
-        Tool tool = new Tool();
-        tool.setUuid(UUID.randomUUID());
-        tool.setName(rq.name());
-        tool.setIsConsumable(rq.isConsumable());
-        tool.setInventoryNumber(rq.inventoryNumber());
-        tool.setResponsibleUuid(rq.responsibleUuid());
-        tool.setProjectUuid(rq.projectUuid());
-        tool.setPrice(rq.price());
-        tool.setOwnershipType(OwnershipType.valueOf(rq.ownershipType()));
-        tool.setRentTill(rq.rentTill());
-        tool.setIsKit(rq.isKit());
-        tool.setKitUuid(rq.kitUuid());
-        tool.setBrand(rq.brandId() == null ? null : brandService.getReference(rq.brandId()));
-        tool.setCategory(rq.categoryId() == null ? null : categoryService.getReference(rq.categoryId()));
-
-        tool.removeLabels();
-        rq.labels().stream().map(labelId -> labelService.getReference(labelId)).forEach(tool::addLabel);
-
-        tool.setIsArchived(rq.isArchived());
-        return repository.save(tool);
     }
 }

@@ -552,9 +552,9 @@ public class ToolServiceTest {
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} name field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} name field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it name
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if name was updated or not (by compare {@link ToolRequest} name and toolName received from database).
      */
     @Test
@@ -562,19 +562,20 @@ public class ToolServiceTest {
         String toolName = "new_tool";
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .name(toolName)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         String updatedValue = jdbcTemplate.queryForObject("SELECT name FROM tools_tool WHERE tool_id = " + toolId, String.class);
         assertEquals(rq.name(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} isConsumable field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} isConsumable field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it isConsumable field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -582,19 +583,20 @@ public class ToolServiceTest {
         boolean isConsumable = true;
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .isConsumable(isConsumable)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         Boolean updatedValue = jdbcTemplate.queryForObject("SELECT is_consumable FROM tools_tool WHERE tool_id = " + toolId, Boolean.class);
         assertEquals(rq.isConsumable(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} inventoryNumber field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} inventoryNumber field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it inventoryNumber field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -602,19 +604,20 @@ public class ToolServiceTest {
         String inventoryNumber = "14-K20NMBB";
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .inventoryNumber(inventoryNumber)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         String updatedValue = jdbcTemplate.queryForObject("SELECT inventory_number FROM tools_tool WHERE tool_id = " + toolId, String.class);
         assertEquals(rq.inventoryNumber(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} responsibleUuid field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} responsibleUuid field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it responsibleUuid field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -622,19 +625,20 @@ public class ToolServiceTest {
         UUID responsibleUuid = UUID.fromString("391e24c3-db85-4d65-8973-9c1ecfa932c2");
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .responsibleUuid(responsibleUuid)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         UUID updatedValue = jdbcTemplate.queryForObject("SELECT responsible_uuid FROM tools_tool WHERE tool_id = " + toolId, UUID.class);
         assertEquals(rq.responsibleUuid(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} projectUuid field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} projectUuid field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it projectUuid field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -642,19 +646,20 @@ public class ToolServiceTest {
         UUID projectUuid = UUID.fromString("391e24c3-db85-4d65-8973-9c1ecfa932c2");
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .projectUuid(projectUuid)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         UUID updatedValue = jdbcTemplate.queryForObject("SELECT project_uuid FROM tools_tool WHERE tool_id = " + toolId, UUID.class);
         assertEquals(rq.projectUuid(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} price field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} price field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it price field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -662,19 +667,20 @@ public class ToolServiceTest {
         BigDecimal price = new BigDecimal("23200.45");
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .price(price)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         BigDecimal updatedValue = jdbcTemplate.queryForObject("SELECT price FROM tools_tool WHERE tool_id = " + toolId, BigDecimal.class);
         assertEquals(rq.price(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} ownershipType field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} ownershipType field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it ownershipType field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -682,19 +688,20 @@ public class ToolServiceTest {
         OwnershipType ownershipType = OwnershipType.RENT;
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND ownership_type = 'OWN'", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .ownershipType(ownershipType.name())
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         OwnershipType updatedValue = jdbcTemplate.queryForObject("SELECT ownership_type FROM tools_tool WHERE tool_id = " + toolId, OwnershipType.class);
         assertEquals(OwnershipType.valueOf(rq.ownershipType()), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} rentTill field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} rentTill field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it rentTill field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -702,19 +709,20 @@ public class ToolServiceTest {
         LocalDate rentTill = LocalDate.of(2023, Month.MAY, 10);
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .rentTill(rentTill)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         LocalDate updatedValue = jdbcTemplate.queryForObject("SELECT rent_till FROM tools_tool WHERE tool_id = " + toolId, LocalDate.class);
         assertEquals(rq.rentTill(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} isKit field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} isKit field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it isKit field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -722,19 +730,20 @@ public class ToolServiceTest {
         boolean isKit = true;
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .isKit(isKit)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         Boolean updatedValue = jdbcTemplate.queryForObject("SELECT is_kit FROM tools_tool WHERE tool_id = " + toolId, Boolean.class);
         assertEquals(rq.isKit(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} kitUuid field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} kitUuid field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it kitUuid field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if field was updated or not by compare value from {@link ToolRequest} and value received from database.
      */
     @Test
@@ -742,21 +751,22 @@ public class ToolServiceTest {
         UUID kitUuid = UUID.fromString("391e24c3-db85-4d65-8973-9c1ecfa932c2");
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .kitUuid(kitUuid)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         UUID updatedValue = jdbcTemplate.queryForObject("SELECT kit_uuid FROM tools_tool WHERE tool_id = " + toolId, UUID.class);
         assertEquals(rq.kitUuid(), updatedValue);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} category.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} category.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then inserts two categories and receives its ids.
      * Then associate first category with tool.
-     * Test using {@link ToolService#update(Long, ToolRequest)} try to change category on tool.
+     * Test using {@link ToolService#save(ToolRequest)} try to change category on tool.
      * Then checks if category was updated or not.
      */
     @Test
@@ -769,10 +779,11 @@ public class ToolServiceTest {
         Long categoryId_2 = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = '" + categoryName + "'", Long.class);
         jdbcTemplate.update("UPDATE tools_tool SET category_id = " + categoryId_1 + " WHERE tool_id = " + toolId);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .categoryId(categoryId_2)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         ToolInfo toolInfo = service.findById(toolId);
         assertEquals(categoryName, toolInfo.category().name());
@@ -780,10 +791,10 @@ public class ToolServiceTest {
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should drop {@link Tool} category.
+     * {@link ToolService#save(ToolRequest)} should drop {@link Tool} category.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then associate category with tool.
-     * Test using {@link ToolService#update(Long, ToolRequest)} try to drop category on tool.
+     * Test using {@link ToolService#save(ToolRequest)} try to drop category on tool.
      * Then checks if category was dropped.
      * Then checks if category still exists in database by checking category id before and after drop.
      */
@@ -794,10 +805,11 @@ public class ToolServiceTest {
         Long categoryId = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1'", Long.class);
         jdbcTemplate.update("UPDATE tools_tool SET category_id = " + categoryId + " WHERE tool_id = " + toolId);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .categoryId(null)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         ToolInfo toolInfo = service.findById(toolId);
         Long categoryIdAfterDrop = jdbcTemplate.queryForObject("SELECT category_id FROM tools_category WHERE name = 'category_1'", Long.class);
@@ -806,11 +818,11 @@ public class ToolServiceTest {
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} brand.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} brand.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then inserts two brands and receives its ids.
      * Then associate first brand with tool.
-     * Test using {@link ToolService#update(Long, ToolRequest)} try to change brand on tool.
+     * Test using {@link ToolService#save(ToolRequest)} try to change brand on tool.
      * Then checks if brand was updated or not.
      */
     @Test
@@ -823,10 +835,11 @@ public class ToolServiceTest {
         Long brandId_2 = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = '" + brandName + "'", Long.class);
         jdbcTemplate.update("UPDATE tools_tool SET brand_id = " + brandId_1 + " WHERE tool_id = " + toolId);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .brandId(brandId_2)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         ToolInfo toolInfo = service.findById(toolId);
         assertEquals(brandName, toolInfo.brand().name());
@@ -834,10 +847,10 @@ public class ToolServiceTest {
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should drop {@link Tool} brand.
+     * {@link ToolService#save(ToolRequest)} should drop {@link Tool} brand.
      * Test finds existing tool id in database with jdbcTemplate.
      * Then associate brand with tool.
-     * Test using {@link ToolService#update(Long, ToolRequest)} try to drop brand on tool.
+     * Test using {@link ToolService#save(ToolRequest)} try to drop brand on tool.
      * Then checks if brand was dropped.
      * Then checks if brand still exists in database by checking brand id before and after drop.
      */
@@ -848,10 +861,11 @@ public class ToolServiceTest {
         Long brandId = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1'", Long.class);
         jdbcTemplate.update("UPDATE tools_tool SET brand_id = " + brandId + " WHERE tool_id = " + toolId);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .brandId(null)
                 .build();
 
-        service.update(toolId, rq);
+        service.save(rq);
 
         ToolInfo toolInfo = service.findById(toolId);
         Long brandIdAfterDrop = jdbcTemplate.queryForObject("SELECT brand_id FROM tools_brand WHERE name = 'brand_1'", Long.class);
@@ -873,10 +887,11 @@ public class ToolServiceTest {
         Long labelId1 = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_1'", Long.class);
         Long labelId2 = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_2'", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .labels(Set.of(labelId1, labelId2))
                 .build();
 
-        Tool savedTool = service.update(toolId, rq);
+        Tool savedTool = service.save(rq);
 
         assertNotNull(savedTool.getLabels());
         assertEquals(2, savedTool.getLabels().size());
@@ -901,10 +916,11 @@ public class ToolServiceTest {
         jdbcTemplate.update("INSERT INTO tools_tool_label (tool_id, label_id) VALUES (" + toolId + ", " + labelId1 + ")");
         jdbcTemplate.update("INSERT INTO tools_tool_label (tool_id, label_id) VALUES (" + toolId + ", " + labelId2 + ")");
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .labels(Set.of(labelId1))
                 .build();
 
-        Tool savedTool = service.update(toolId, rq);
+        Tool savedTool = service.save(rq);
 
         assertNotNull(savedTool.getLabels());
         assertEquals(1, savedTool.getLabels().size());
@@ -929,9 +945,10 @@ public class ToolServiceTest {
         jdbcTemplate.update("INSERT INTO tools_tool_label (tool_id, label_id) VALUES (" + toolId + ", " + labelId1 + ")");
         jdbcTemplate.update("INSERT INTO tools_tool_label (tool_id, label_id) VALUES (" + toolId + ", " + labelId2 + ")");
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .build();
 
-        Tool savedTool = service.update(toolId, rq);
+        Tool savedTool = service.save(rq);
 
         assertNotNull(savedTool.getLabels());
         assertEquals(0, savedTool.getLabels().size());
@@ -952,10 +969,11 @@ public class ToolServiceTest {
         Long labelId2 = jdbcTemplate.queryForObject("SELECT label_id FROM tools_label WHERE name = 'label_2'", Long.class);
         jdbcTemplate.update("INSERT INTO tools_tool_label (tool_id, label_id) VALUES (" + toolId + ", " + labelId1 + ")");
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .labels(Set.of(labelId1, labelId2))
                 .build();
 
-        Tool savedTool = service.update(toolId, rq);
+        Tool savedTool = service.save(rq);
 
         assertNotNull(savedTool.getLabels());
         assertEquals(2, savedTool.getLabels().size());
@@ -965,27 +983,29 @@ public class ToolServiceTest {
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should update {@link Tool} isArchived field.
+     * {@link ToolService#save(ToolRequest)} should update {@link Tool} isArchived field.
      * Test finds existing tool id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if isArchived flag was updated or not (using assertTrue on field).
      */
     @Test
     public void update_should_archive_tool_test() {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .isArchived(true)
                 .build();
-        service.update(toolId, rq);
+
+        service.save(rq);
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_tool WHERE tool_id = " + toolId, Boolean.class);
         assertTrue(isArchived);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should not update {@link Tool} if name field is null.
+     * {@link ToolService#save(ToolRequest)} should not update {@link Tool} if name field is null.
      * Test finds existing tool id in database with jdbcTemplate and try to update it name field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if field value not changed during test.
      */
@@ -994,19 +1014,20 @@ public class ToolServiceTest {
         String toolName = "tool_1";
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = '" + toolName + "' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .name(null)
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(toolId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         String toolNameFromDb = jdbcTemplate.queryForObject("SELECT name FROM tools_tool WHERE tool_id = " + toolId + " AND is_archived IS FALSE", String.class);
         assertEquals(toolName, toolNameFromDb);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should not update {@link Tool} if ownershipType field is null.
+     * {@link ToolService#save(ToolRequest)} should not update {@link Tool} if ownershipType field is null.
      * Test finds existing tool id in database with jdbcTemplate and try to update it ownershipType field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if field value not changed during test.
      */
@@ -1017,10 +1038,11 @@ public class ToolServiceTest {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = '" + toolName + "' AND is_archived IS FALSE", Long.class);
         OwnershipType valueBeforeUpdate = jdbcTemplate.queryForObject("SELECT ownership_type FROM tools_tool WHERE name = '" + toolName + "' AND is_archived IS FALSE", OwnershipType.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .ownershipType(null)
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(toolId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         OwnershipType valueAfterUpdate = jdbcTemplate.queryForObject("SELECT ownership_type FROM tools_tool WHERE tool_id = " + toolId, OwnershipType.class);
         assertNotNull(valueAfterUpdate);
@@ -1028,9 +1050,9 @@ public class ToolServiceTest {
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should not update {@link Tool} if isConsumable field is null.
+     * {@link ToolService#save(ToolRequest)} should not update {@link Tool} if isConsumable field is null.
      * Test finds existing tool id in database with jdbcTemplate and try to update it isConsumable field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if field value not changed during test.
      */
@@ -1039,19 +1061,20 @@ public class ToolServiceTest {
         String toolName = "tool_1";
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = '" + toolName + "'", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .isConsumable(null)
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(toolId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         Boolean isConsumable = jdbcTemplate.queryForObject("SELECT is_consumable FROM tools_tool WHERE tool_id = " + toolId, Boolean.class);
         assertFalse(isConsumable);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should not update {@link Tool} if isKit field is null.
+     * {@link ToolService#save(ToolRequest)} should not update {@link Tool} if isKit field is null.
      * Test finds existing tool id in database with jdbcTemplate and try to update it isKit field
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if field value not changed during test.
      */
@@ -1060,19 +1083,20 @@ public class ToolServiceTest {
         String toolName = "tool_1";
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = '" + toolName + "'", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .isKit(null)
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(toolId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         Boolean isKit = jdbcTemplate.queryForObject("SELECT is_kit FROM tools_tool WHERE tool_id = " + toolId, Boolean.class);
         assertFalse(isKit);
     }
 
     /**
-     * {@link ToolService#update(Long, ToolRequest)} should not update {@link Tool} if isArchived flag is null.
+     * {@link ToolService#save(ToolRequest)} should not update {@link Tool} if isArchived flag is null.
      * Test finds existing tool id in database with jdbcTemplate and try to update it isArchived flag
-     * using {@link ToolService#update(Long, ToolRequest)}.
+     * using {@link ToolService#save(ToolRequest)}.
      * Then checks if exception {@link DataIntegrityViolationException} was thrown.
      * Then checks if isArchived flag not changed during test.
      */
@@ -1080,10 +1104,11 @@ public class ToolServiceTest {
     public void update_should_not_update_null_isArchived_test() {
         long toolId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE name = 'tool_1' AND is_archived IS FALSE", Long.class);
         ToolRequest rq = getDefaultToolRequest()
+                .id(toolId)
                 .isArchived(null)
                 .build();
 
-        assertThrows(DataIntegrityViolationException.class, () -> service.update(toolId, rq));
+        assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
 
         Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM tools_tool WHERE tool_id = " + toolId, Boolean.class);
         assertFalse(isArchived);
