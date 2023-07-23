@@ -61,7 +61,6 @@ public class BrandControllerTest extends AbstractControllerTest {
 
     private BrandRequest.BrandRequestBuilder getDefaultBrandRequest() {
         return BrandRequest.builder()
-                .id(null)
                 .name("MAKITA")
                 .isArchived(false);
     }

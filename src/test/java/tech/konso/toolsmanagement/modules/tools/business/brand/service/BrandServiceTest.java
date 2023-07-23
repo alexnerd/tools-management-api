@@ -63,7 +63,6 @@ public class BrandServiceTest {
 
     private BrandRequest.BrandRequestBuilder getDefaultBrandRequest() {
         return BrandRequest.builder()
-                .id(null)
                 .name("MAKITA")
                 .isArchived(false);
     }
