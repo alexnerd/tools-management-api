@@ -81,7 +81,6 @@ public class ToolControllerTest extends AbstractControllerTest {
                 .labels(Collections.emptySet());
     }
 
-
     /**
      * {@link ToolController#find(Long)} should return {@link Tool} by id from database.
      * Test checks status code 200 and equality toolId (received from jdbcTemplate request)

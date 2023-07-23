@@ -65,7 +65,6 @@ public class BrandControllerTest extends AbstractControllerTest {
                 .isArchived(false);
     }
 
-
     /**
      * {@link BrandController#find(Long)} should return {@link Brand} by id from database.
      * Test checks status code 200 and equality brandId (received from jdbcTemplate request)
