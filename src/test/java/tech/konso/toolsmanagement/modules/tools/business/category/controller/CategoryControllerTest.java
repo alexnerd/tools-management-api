@@ -69,7 +69,6 @@ public class CategoryControllerTest extends AbstractControllerTest {
                 .isArchived(false);
     }
 
-
     /**
      * {@link CategoryController#find(Long)} should return {@link Category} by id from database.
      * Test checks status code 200 and equality categoryId (received from jdbcTemplate request)

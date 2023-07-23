@@ -70,7 +70,6 @@ public class CategoryServiceTest {
         return CategoryRequest.builder()
                 .name("new_category")
                 .isArchived(false);
-
     }
 
     /**
