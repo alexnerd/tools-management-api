@@ -63,7 +63,6 @@ public class LabelServiceTest {
 
     private LabelRequest.LabelRequestBuilder getDefaultLabelRequest() {
         return LabelRequest.builder()
-                .id(null)
                 .name("Important")
                 .isArchived(false);
     }

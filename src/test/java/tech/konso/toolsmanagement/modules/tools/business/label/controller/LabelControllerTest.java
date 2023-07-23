@@ -61,11 +61,9 @@ public class LabelControllerTest extends AbstractControllerTest {
 
     private LabelRequest.LabelRequestBuilder getDefaultLabelRequest() {
         return LabelRequest.builder()
-                .id(null)
                 .name("Important")
                 .isArchived(false);
     }
-
 
     /**
      * {@link LabelController#find(Long)} should return {@link Label} by id from database.
