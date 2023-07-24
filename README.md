@@ -37,6 +37,10 @@ login: admin
 
 password: SuperSecret
 
+Available dashboards:
+- spring-boot 3
+- PostgreSQL
+
 ## Metrics
 http://localhost:8080/tools-management-api/actuator
 

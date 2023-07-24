@@ -2,8 +2,13 @@ global:
   scrape_interval: 1m
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: 'prometheus-tools-api'
     scrape_interval: 1m
     metrics_path: "/tools-management-api/actuator/prometheus"
     static_configs:
       - targets: ['tools:8080']
+  - job_name: 'prometheus-postgres-db'
+    scrape_interval: 1m
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: [ 'postgres-exporter:9187' ]
