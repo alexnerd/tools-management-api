@@ -11,7 +11,7 @@ import tech.konso.toolsmanagement.modules.tools.business.label.persistence.dao.L
  * <p>Supports CRUD operations, searching by specification and pageable format.
  * <p>By default, uses read only transactions, if you want another mode, you must directly specify it on your method.
  */
-@Repository
+@Repository("ToolsLabelRepository")
 @Transactional(readOnly = true)
 public interface LabelRepository extends JpaRepository<Label, Long>, JpaSpecificationExecutor<Label> {
 }

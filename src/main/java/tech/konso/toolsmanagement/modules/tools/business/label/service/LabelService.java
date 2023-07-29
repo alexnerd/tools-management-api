@@ -21,7 +21,7 @@ import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecifica
 /**
  * Service layer for working with labels.
  */
-@Service
+@Service("ToolsLabelService")
 public class LabelService {
 
     @Autowired

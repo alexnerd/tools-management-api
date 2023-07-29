@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-@Entity
+@Entity(name="ToolsLabel")
 @Table(name = "tools_label")
 public class Label implements Serializable {
 

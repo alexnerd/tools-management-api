@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -25,7 +26,7 @@ import static tech.konso.toolsmanagement.modules.tools.business.label.persistenc
 import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
 
 @Validated
-@RestController
+@RestController("ToolsLabelController")
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 1800L,
         methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT})
 @RequestMapping("/v1/tools/labels")
