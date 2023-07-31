@@ -15,7 +15,7 @@ import tech.konso.toolsmanagement.PostgreSQLContainerExtension;
 import tech.konso.toolsmanagement.modules.tools.business.label.controller.dto.LabelFilterResponse;
 import tech.konso.toolsmanagement.modules.tools.business.label.controller.dto.LabelRequest;
 import tech.konso.toolsmanagement.modules.tools.business.label.persistence.dao.Label;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.List;
 

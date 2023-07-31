@@ -117,7 +117,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
      */
     @Test
     public void find_should_return_bad_request_test() throws Exception {
-        long categoryId = -1;
+        long categoryId = -1L;
 
         mockMvc.perform(get(urlEndpoint() + "/" + categoryId))
                 .andDo(print())

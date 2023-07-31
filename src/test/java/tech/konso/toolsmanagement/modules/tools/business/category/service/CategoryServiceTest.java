@@ -16,9 +16,8 @@ import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryInfo;
 import tech.konso.toolsmanagement.modules.tools.business.category.controller.dto.CategoryRequest;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

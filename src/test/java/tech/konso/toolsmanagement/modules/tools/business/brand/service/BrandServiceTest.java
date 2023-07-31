@@ -15,7 +15,7 @@ import tech.konso.toolsmanagement.PostgreSQLContainerExtension;
 import tech.konso.toolsmanagement.modules.tools.business.brand.controller.dto.BrandFilterResponse;
 import tech.konso.toolsmanagement.modules.tools.business.brand.controller.dto.BrandRequest;
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.dao.Brand;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.List;
 

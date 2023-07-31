@@ -91,7 +91,7 @@ public class BrandControllerTest extends AbstractControllerTest {
      */
     @Test
     public void find_should_return_bad_request_test() throws Exception {
-        long brandId = -1;
+        long brandId = -1L;
 
         mockMvc.perform(get(urlEndpoint() + "/" + brandId))
                 .andDo(print())

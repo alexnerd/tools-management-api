@@ -107,7 +107,7 @@ public class ToolControllerTest extends AbstractControllerTest {
      */
     @Test
     public void find_should_return_bad_request_test() throws Exception {
-        long toolId = -1;
+        long toolId = -1L;
 
         mockMvc.perform(get(urlEndpoint() + "/" + toolId))
                 .andDo(print())

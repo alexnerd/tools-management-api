@@ -91,7 +91,7 @@ public class LabelControllerTest extends AbstractControllerTest {
      */
     @Test
     public void find_should_return_bad_request_test() throws Exception {
-        long labelId = -1;
+        long labelId = -1L;
 
         mockMvc.perform(get(urlEndpoint() + "/" + labelId))
                 .andDo(print())

@@ -19,7 +19,7 @@ import tech.konso.toolsmanagement.modules.tools.business.label.persistence.dao.L
 import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.*;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.Tool;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.enums.OwnershipType;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
