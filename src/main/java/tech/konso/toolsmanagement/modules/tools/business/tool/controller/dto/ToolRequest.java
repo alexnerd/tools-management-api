@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.enums.OwnershipType;
-import tech.konso.toolsmanagement.modules.tools.commons.validators.NullOrNotBlank;
-import tech.konso.toolsmanagement.modules.tools.commons.validators.ValueOfEnum;
+import tech.konso.toolsmanagement.system.commons.validators.NullOrNotBlank;
+import tech.konso.toolsmanagement.system.commons.validators.ValueOfEnum;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

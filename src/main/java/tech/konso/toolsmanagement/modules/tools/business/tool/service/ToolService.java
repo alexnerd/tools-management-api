@@ -21,7 +21,7 @@ import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.reposi
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification;
 import tech.konso.toolsmanagement.modules.tools.business.tool.service.mappers.ToolsDtoMapper;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Optional;
 import java.util.UUID;
