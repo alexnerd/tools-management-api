@@ -1,4 +1,4 @@
-package tech.konso.toolsmanagement.modules.tools.commons.validators;
+package tech.konso.toolsmanagement.system.commons.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
