@@ -30,6 +30,7 @@ import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecifica
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 1800L,
         methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT})
 @RequestMapping("/v1/tools/labels")
+@Tag(name="tools-labels-resource", description = "API resource for management tools labels")
 public class LabelController {
 
     @Autowired
