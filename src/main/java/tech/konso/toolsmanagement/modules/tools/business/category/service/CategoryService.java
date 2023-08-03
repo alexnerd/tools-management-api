@@ -16,7 +16,7 @@ import tech.konso.toolsmanagement.modules.tools.business.category.persistence.re
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.specification.CategorySpecification;
 import tech.konso.toolsmanagement.modules.tools.business.category.service.mappers.CategoryDtoMapper;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Optional;
 

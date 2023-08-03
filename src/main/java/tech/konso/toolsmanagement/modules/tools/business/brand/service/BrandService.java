@@ -12,7 +12,7 @@ import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.dao.B
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.repository.BrandRepository;
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.specification.BrandSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Optional;
 

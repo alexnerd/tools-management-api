@@ -12,7 +12,7 @@ import tech.konso.toolsmanagement.modules.tools.business.label.persistence.dao.L
 import tech.konso.toolsmanagement.modules.tools.business.label.persistence.repository.LabelRepository;
 import tech.konso.toolsmanagement.modules.tools.business.label.persistence.specification.LabelSpecification;
 import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
-import tech.konso.toolsmanagement.modules.tools.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Optional;
 
