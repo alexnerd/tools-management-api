@@ -1,4 +1,4 @@
-package tech.konso.toolsmanagement.modules.tools.commons.exceptions;
+package tech.konso.toolsmanagement.system.commons.exceptions;
 
 public class BPException extends RuntimeException {
     public BPException(String message) {

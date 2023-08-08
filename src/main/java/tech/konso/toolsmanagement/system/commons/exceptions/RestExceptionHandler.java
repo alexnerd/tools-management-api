@@ -1,4 +1,4 @@
-package tech.konso.toolsmanagement.modules.tools.commons.exceptions;
+package tech.konso.toolsmanagement.system.commons.exceptions;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;

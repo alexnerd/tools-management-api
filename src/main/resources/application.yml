@@ -25,3 +25,6 @@ management:
       enabled: true
     readinessstate:
       enabled: true
+
+springdoc:
+  use-fqn: true
