@@ -11,12 +11,12 @@ import tech.konso.toolsmanagement.modules.persons.business.label.controller.dto.
 import tech.konso.toolsmanagement.modules.persons.business.label.persistence.dao.Label;
 import tech.konso.toolsmanagement.modules.persons.business.label.persistence.repository.LabelRepository;
 import tech.konso.toolsmanagement.modules.persons.business.label.persistence.specification.LabelSpecification;
-import tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
 import java.util.Optional;
 
-import static tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Service layer for working with labels.

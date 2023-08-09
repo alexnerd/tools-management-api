@@ -11,12 +11,12 @@ import tech.konso.toolsmanagement.modules.persons.business.role.controller.dto.R
 import tech.konso.toolsmanagement.modules.persons.business.role.persistence.dao.Role;
 import tech.konso.toolsmanagement.modules.persons.business.role.persistence.repository.RoleRepository;
 import tech.konso.toolsmanagement.modules.persons.business.role.persistence.specification.RoleSpecification;
-import tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
 import java.util.Optional;
 
-import static tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Service layer for working with roles.

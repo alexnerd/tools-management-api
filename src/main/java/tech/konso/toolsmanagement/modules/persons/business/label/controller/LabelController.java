@@ -23,7 +23,7 @@ import tech.konso.toolsmanagement.modules.persons.business.label.service.LabelSe
 import java.net.URI;
 
 import static tech.konso.toolsmanagement.modules.persons.business.label.persistence.specification.LabelSpecification.*;
-import static tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 @Validated
 @RestController("PersonsLabelController")

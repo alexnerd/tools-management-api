@@ -21,7 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tech.konso.toolsmanagement.modules.persons.business.label.persistence.specification.LabelSpecification.*;
-import static tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Label service layer tests.

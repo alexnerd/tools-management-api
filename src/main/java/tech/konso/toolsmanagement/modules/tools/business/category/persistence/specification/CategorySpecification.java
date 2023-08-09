@@ -4,9 +4,10 @@ import jakarta.persistence.criteria.Order;
 import org.springframework.data.jpa.domain.Specification;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.dao.Category_;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.FILTER_SEPARATOR;
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.LIKE_NAME_MIN_LENGTH;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.FILTER_SEPARATOR;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.LIKE_NAME_MIN_LENGTH;
 
 /**
  * Class with specifications for {@link Category}
@@ -17,7 +18,7 @@ public final class CategorySpecification {
      * Specification for name.
      * Uses like pattern %name%.
      * Before searching transform string to lower case.
-     * Working only with string greater or equals {@link tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification#LIKE_NAME_MIN_LENGTH
+     * Working only with string greater or equals {@link AbstractSpecification#LIKE_NAME_MIN_LENGTH
      *
      * @param likeName searching string
      * @return created specification
@@ -63,7 +64,7 @@ public final class CategorySpecification {
      * Specification for sorting categories.
      * Support sorting by name, create date, update date.
      * For every filter supports asc and desc order.
-     * To specify order you must specify it using {@link tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification#FILTER_SEPARATOR}
+     * To specify order you must specify it using {@link AbstractSpecification#FILTER_SEPARATOR}
      * <p>
      * Example:
      * <pre>

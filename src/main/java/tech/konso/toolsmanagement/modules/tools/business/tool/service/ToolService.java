@@ -20,13 +20,13 @@ import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.dao.en
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.repository.ToolRepository;
 import tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification;
 import tech.konso.toolsmanagement.modules.tools.business.tool.service.mappers.ToolsDtoMapper;
-import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Service layer for working with tools.

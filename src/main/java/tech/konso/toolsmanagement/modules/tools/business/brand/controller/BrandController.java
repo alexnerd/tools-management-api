@@ -23,7 +23,7 @@ import tech.konso.toolsmanagement.modules.tools.business.brand.service.BrandServ
 import java.net.URI;
 
 import static tech.konso.toolsmanagement.modules.tools.business.brand.persistence.specification.BrandSpecification.*;
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 @Validated
 @RestController

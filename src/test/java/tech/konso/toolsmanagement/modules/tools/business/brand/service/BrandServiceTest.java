@@ -21,7 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tech.konso.toolsmanagement.modules.tools.business.brand.persistence.specification.BrandSpecification.*;
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Brand service layer tests.

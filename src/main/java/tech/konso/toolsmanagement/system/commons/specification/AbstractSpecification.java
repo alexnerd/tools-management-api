@@ -1,4 +1,4 @@
-package tech.konso.toolsmanagement.modules.persons.commons;
+package tech.konso.toolsmanagement.system.commons.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 
@@ -35,3 +35,4 @@ public abstract class AbstractSpecification {
         }
     }
 }
+

@@ -11,12 +11,12 @@ import tech.konso.toolsmanagement.modules.tools.business.brand.controller.dto.Br
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.dao.Brand;
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.repository.BrandRepository;
 import tech.konso.toolsmanagement.modules.tools.business.brand.persistence.specification.BrandSpecification;
-import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Optional;
 
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Service layer for working with brands.

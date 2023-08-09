@@ -4,10 +4,10 @@ import jakarta.persistence.criteria.Order;
 import org.springframework.data.jpa.domain.Specification;
 import tech.konso.toolsmanagement.modules.persons.business.label.persistence.dao.Label;
 import tech.konso.toolsmanagement.modules.persons.business.label.persistence.dao.Label_;
-import tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
-import static tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification.FILTER_SEPARATOR;
-import static tech.konso.toolsmanagement.modules.persons.commons.AbstractSpecification.LIKE_NAME_MIN_LENGTH;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.FILTER_SEPARATOR;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.LIKE_NAME_MIN_LENGTH;
 
 /**
  * Class with specifications for {@link Label}
@@ -47,7 +47,7 @@ public final class LabelSpecification {
      * Specification for sorting labels.
      * Support sorting by name, create date, update date.
      * For every filter supports asc and desc order.
-     * To specify order you must specify it using {@link tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification#FILTER_SEPARATOR}
+     * To specify order you must specify it using {@link tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification#FILTER_SEPARATOR}
      * <p>
      * Example:
      * <pre>

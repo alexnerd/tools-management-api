@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification.*;
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Tool service layer tests.

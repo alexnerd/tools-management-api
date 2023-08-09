@@ -15,12 +15,12 @@ import tech.konso.toolsmanagement.modules.tools.business.category.persistence.da
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.repository.CategoryRepository;
 import tech.konso.toolsmanagement.modules.tools.business.category.persistence.specification.CategorySpecification;
 import tech.konso.toolsmanagement.modules.tools.business.category.service.mappers.CategoryDtoMapper;
-import tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Optional;
 
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 /**
  * Service layer for working with categories.

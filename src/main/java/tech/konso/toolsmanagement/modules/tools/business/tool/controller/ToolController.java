@@ -25,7 +25,7 @@ import tech.konso.toolsmanagement.modules.tools.business.tool.service.ToolServic
 import java.net.URI;
 
 import static tech.konso.toolsmanagement.modules.tools.business.tool.persistence.specification.ToolSpecification.*;
-import static tech.konso.toolsmanagement.modules.tools.commons.AbstractSpecification.specBuilder;
+import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
 @Validated
 @RestController
