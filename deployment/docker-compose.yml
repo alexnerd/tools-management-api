@@ -47,6 +47,32 @@ services:
     depends_on:
       - postgres-db
 
+  minio:
+    container_name: minio
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - /tmp:/data
+    environment:
+      MINIO_ROOT_USER: tools_management_user
+      MINIO_ROOT_PASSWORD: SuperSecret
+    command: server --console-address ":9001" /data
+
+  minio-bucket:
+    container_name: minio-bucket
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set tools_minio http://minio:9000 tools_management_user SuperSecret;
+      /usr/bin/mc mb tools_minio/personphoto;
+      /usr/bin/mc anonymous set public tools_minio/personphoto;
+      exit 0;
+      "
+
   tools:
     build:
       context: ..
