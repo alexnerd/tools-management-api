@@ -41,6 +41,15 @@ Available dashboards:
 - spring-boot 3
 - PostgreSQL
 
+## Minio
+Minio available on http://localhost:9000
+
+login: tools_management_user
+
+password: SuperSecret
+
+bucket name: personphoto (/tmp folder on laptop)
+
 ## Metrics
 http://localhost:8080/tools-management-api/actuator
 
