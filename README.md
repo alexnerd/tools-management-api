@@ -9,6 +9,15 @@ To run application, you must follow this steps:
 
 API available on http://localhost:8080/tools-management-api/
 
+Note: you need GIT_ACCESS_TOKEN variable in your environment
+
+How to add environment variable on Mac:
+1. open terminal window
+2. type sudo su and enter root password
+3. type open .zshenv
+4. in text editor add to end of file: export GIT_ACCESS_TOKEN=your_token
+5. save file and restart your laptop
+
 ### Swagger
 Swagger available on http://localhost:8080/tools-management-api/swagger-ui/index.html
 
@@ -49,6 +58,9 @@ login: tools_management_user
 password: SuperSecret
 
 bucket name: personphoto (/tmp folder on laptop)
+
+## File storage service
+Swagger available on http://localhost:8070/file-storage-api/swagger-ui/index.html
 
 ## Metrics
 http://localhost:8080/tools-management-api/actuator

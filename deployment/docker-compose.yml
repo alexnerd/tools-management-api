@@ -59,6 +59,11 @@ services:
       MINIO_ROOT_USER: tools_management_user
       MINIO_ROOT_PASSWORD: SuperSecret
     command: server --console-address ":9001" /data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 1s
+      retries: 3
 
   minio-bucket:
     container_name: minio-bucket
@@ -92,6 +97,25 @@ services:
       - "4545:4545"
     depends_on:
       postgres-db:
+        condition: service_healthy
+
+  file-storage:
+    build: https://${GIT_ACCESS_TOKEN}@github.com/alexnerd/file-storage-api.git#main
+    container_name: file-storage
+    environment:
+      MINIO_LOGIN: tools_management_user
+      MINIO_PASSWORD: SuperSecret
+      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_PHOTO_BUCKET: personphoto
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/file-storage-api/actuator/health" ]
+      interval: 5s
+      timeout: 1s
+      retries: 3
+    ports:
+      - "8070:8080"
+    depends_on:
+      minio:
         condition: service_healthy
 
   prometheus:
