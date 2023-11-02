@@ -5,9 +5,9 @@ server:
 spring:
   jpa.open-in-view: false
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
+    url: ${DATABASE_URL:jdbc:postgresql://postgres:5432/tools_management}
+    username: ${DATABASE_USER:tools_management_user}
+    password: ${DATABASE_PASSWORD:SuperSecret}
     driver-class-name: org.postgresql.Driver
 
 management:
