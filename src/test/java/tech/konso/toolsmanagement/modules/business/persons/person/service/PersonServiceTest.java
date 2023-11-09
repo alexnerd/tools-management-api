@@ -17,8 +17,6 @@ import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto
 import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.RoleShort;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.dao.Person;
 import tech.konso.toolsmanagement.modules.business.persons.role.persistence.dao.Role;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolRequest;
-import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.Tool;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.Collections;
@@ -108,9 +106,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with phone number.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if id not null and phone number field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if id not null and phone number field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_phone_number_test() {
@@ -128,9 +126,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with company uuid.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if id not null and company uuid field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if id not null and company uuid field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_company_uuid_test() {
@@ -147,9 +145,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with surname.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if surname field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if surname field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_surname_test() {
@@ -166,9 +164,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with name.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if name field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if name field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_name_test() {
@@ -185,9 +183,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with patronymic.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if patronymic field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if patronymic field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_patronymic_test() {
@@ -204,9 +202,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with job title.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if job title field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if job title field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_job_title_test() {
@@ -223,9 +221,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with is archived.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if is archived field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if is archived field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_is_archived_test() {
@@ -242,9 +240,9 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with is unregistered.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
-         * try to save new {@link Tool} object to database.
-         * Then checks returns {@link Tool} object if is unregistered field equals this field
-         * from dto object {@link ToolRequest}.
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if is unregistered field equals this field
+         * from dto object {@link PersonRequest}.
          */
         @Test
         public void save_should_save_person_is_unregistered_test() {
@@ -314,7 +312,7 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#findById(Long)} should return {@link PersonInfo} by id from database.
          * Test checks equality person id (received from jdbcTemplate request)
-         * with id of tool object received from {@link PersonService#findById(Long)}
+         * with id of person object received from {@link PersonService#findById(Long)}
          */
         @Test
         public void findById_should_return_person_test() {
@@ -384,7 +382,7 @@ public class PersonServiceTest {
         /**
          * {@link PersonService#findById(Long)} should throw {@link BPException} exception
          * if {@link Person} with id not exist in database.
-         * Test try to find tool whit id = -1 (negative num,ber guaranties, that no such id exists in database)
+         * Test try to find person whit id = -1 (negative num,ber guaranties, that no such id exists in database)
          * and check if {@link BPException} is thrown.
          */
         @Test
