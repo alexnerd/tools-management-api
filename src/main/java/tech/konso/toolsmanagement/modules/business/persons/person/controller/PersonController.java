@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
@@ -15,11 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonFilterInfo;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonFilterResponse;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonInfo;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonRequest;
+import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.dao.Person;
 import tech.konso.toolsmanagement.modules.business.persons.person.service.PersonService;
 
@@ -28,12 +27,13 @@ import java.net.URI;
 import static tech.konso.toolsmanagement.modules.business.persons.person.persistence.specification.PersonSpecification.*;
 import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
+@Slf4j
 @Validated
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 1800L,
         methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT})
 @RequestMapping("/v1/persons/person")
-@Tag(name="persons-resource", description = "API resource for management persons")
+@Tag(name = "persons-resource", description = "API resource for management persons")
 public class PersonController {
     @Autowired
     private PersonService service;
@@ -102,8 +102,14 @@ public class PersonController {
     @Parameters({
             @Parameter(name = "id", description = "id of person", example = "7", required = true)
     })
-    @GetMapping(value = "/{id}/photo", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<InputStreamResource> findPersonPhoto(@PathVariable("id") Long id) {
-        return null;
+    @GetMapping(value = "/{id}/photo", produces = MediaType.IMAGE_JPEG_VALUE)
+    public InputStreamResource findPhoto(@PathVariable("id") Long id) {
+        return service.findPhoto(id);
+    }
+
+    @Operation(summary = "Upload person photo")
+    @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public UploadPhotoResponse uploadPhoto(@RequestPart("attachment") MultipartFile multipartFile) {
+        return service.uploadPhoto(multipartFile);
     }
 }

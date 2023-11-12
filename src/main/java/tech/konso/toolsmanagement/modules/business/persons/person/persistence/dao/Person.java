@@ -100,6 +100,13 @@ public class Person implements Serializable {
     private Boolean isUnregistered;
 
     /**
+     * Uuid of photo in file storage
+     */
+    @Setter
+    @Column(name = "photo_uuid")
+    private UUID photoUuid;
+
+    /**
      * Person roles
      * Foreign keys - id of persons_persons_roles table
      */

@@ -7,6 +7,15 @@ spring:
         format_sql: true
   datasource:
     driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+integration:
+  file-storage-api:
+    url: http://localhost
+    web-client-buffer-megabytes: 5
 
 logging:
   level:

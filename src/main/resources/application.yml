@@ -9,6 +9,15 @@ spring:
     username: ${DATABASE_USER:tools_management_user}
     password: ${DATABASE_PASSWORD:SuperSecret}
     driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+integration:
+  file-storage-api:
+    url: ${INTEGRATION_FILE_STORAGE_API_URL:http://localhost}
+    web-client-buffer-megabytes: ${INTEGRATION_FILE_STORAGE_API_BUFFER_MB:5}
 
 management:
   endpoints:

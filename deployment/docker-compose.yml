@@ -73,8 +73,8 @@ services:
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc alias set tools_minio http://minio:9000 tools_management_user SuperSecret;
-      /usr/bin/mc mb tools_minio/personphoto;
-      /usr/bin/mc anonymous set public tools_minio/personphoto;
+      /usr/bin/mc mb tools_minio/photopersonbucket;
+      /usr/bin/mc anonymous set public tools_minio/photopersonbucket;
       exit 0;
       "
 
@@ -87,6 +87,7 @@ services:
       DATABASE_PASSWORD: SuperSecret
       DATABASE_USER: tools_management_user
       DATABASE_URL: "jdbc:postgresql://postgres:5432/tools_management"
+      INTEGRATION_FILE_STORAGE_API_URL: "http://file-storage:8080/file-storage-api"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/tools-management-api/actuator/health"]
       interval: 5s
@@ -106,7 +107,7 @@ services:
       MINIO_LOGIN: tools_management_user
       MINIO_PASSWORD: SuperSecret
       MINIO_ENDPOINT: "http://minio:9000"
-      MINIO_PHOTO_BUCKET: personphoto
+      MINIO_PHOTO_BUCKET: photopersonbucket
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/file-storage-api/actuator/health" ]
       interval: 5s

@@ -5,7 +5,6 @@ import tech.konso.toolsmanagement.modules.business.tools.category.persistence.da
 import tech.konso.toolsmanagement.modules.business.tools.label.persistence.dao.Label;
 import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.Tool;
-import tech.konso.toolsmanagement.modules.tools.business.tool.controller.dto.*;
 
 import java.util.Optional;
 import java.util.stream.Collectors;

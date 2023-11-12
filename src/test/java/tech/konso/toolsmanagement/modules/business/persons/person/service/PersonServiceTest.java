@@ -5,20 +5,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import tech.konso.toolsmanagement.PostgreSQLContainerExtension;
 import tech.konso.toolsmanagement.modules.business.persons.label.persistence.dao.Label;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.LabelShort;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonInfo;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonRequest;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.RoleShort;
+import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.dao.Person;
 import tech.konso.toolsmanagement.modules.business.persons.role.persistence.dao.Role;
+import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
+import tech.konso.toolsmanagement.modules.integration.facade.FileType;
+import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
@@ -26,6 +36,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 /**
  * Person service layer tests.
@@ -48,9 +60,14 @@ public class PersonServiceTest {
     @Autowired
     private PersonService service;
 
+    @MockBean
+    private FileStorageFacade fileStorageFacade;
+
+    private final static String PATH_TO_JPEG_FILE = "src/test/resources/photo/TEST_PHOTO.jpeg";
+
     @BeforeEach
     public void setUp() {
-        jdbcTemplate.update("INSERT INTO persons_person (surname, name, job_title, uuid) VALUES ('surname_1', 'name_1', 'job_title_1', '935921a7-692e-4ee4-a089-2695b68e9801')");
+        jdbcTemplate.update("INSERT INTO persons_person (surname, name, job_title, uuid, photo_uuid) VALUES ('surname_1', 'name_1', 'job_title_1', '935921a7-692e-4ee4-a089-2695b68e9801', '935921a7-692e-4ee4-a089-2695b68e9801')");
         jdbcTemplate.update("INSERT INTO persons_person (surname, name, job_title, uuid) VALUES ('surname_2', 'name_2', 'job_title_2', '935921a7-692e-4ee4-a089-2695b68e9802')");
         jdbcTemplate.update("INSERT INTO persons_person (surname, name, job_title, uuid) VALUES ('surname_3', 'name_3', 'job_title_3', '935921a7-692e-4ee4-a089-2695b68e9803')");
         jdbcTemplate.update("INSERT INTO persons_person (surname, name, job_title, uuid) VALUES ('surname_4', 'name_4', 'job_title_4', '935921a7-692e-4ee4-a089-2695b68e9804')");
@@ -80,6 +97,19 @@ public class PersonServiceTest {
                 .isUnregistered(false)
                 .roles(Collections.emptySet())
                 .labels(Collections.emptySet());
+    }
+
+    private byte[] getPhoto(String filePath) throws IOException {
+        Path path = Path.of(filePath);
+        return Files.readAllBytes(path);
+    }
+
+    private MockMultipartFile getMockMultipartFile() throws IOException {
+        return new MockMultipartFile(
+                "file",
+                "file.jpeg",
+                MediaType.IMAGE_JPEG_VALUE,
+                getPhoto(PATH_TO_JPEG_FILE));
     }
 
     @Nested
@@ -257,6 +287,25 @@ public class PersonServiceTest {
         }
 
         /**
+         * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with photo uuid.
+         * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
+         * try to save new {@link Person} object to database.
+         * Then checks returns {@link Person} object if id not null and photo uuid field equals this field
+         * from dto object {@link PersonRequest}.
+         */
+        @Test
+        public void save_should_save_person_photo_uuid_test() {
+            UUID photoUuid = UUID.fromString("935921a7-692e-4ee4-a089-2695b68e9801");
+            PersonRequest rq = getDefaultPersonRequest()
+                    .photoUuid(photoUuid)
+                    .build();
+
+            Person savedPerson = service.save(rq);
+
+            assertEquals(rq.photoUuid(), savedPerson.getPhotoUuid());
+        }
+
+        /**
          * {@link PersonService#save(PersonRequest)}} should save {@link Person} object with labels.
          * Test creates dto object {@link PersonRequest} and then using {@link PersonService#save(PersonRequest)}
          * try to save new {@link Person} object with {@link Label} to database.
@@ -390,6 +439,84 @@ public class PersonServiceTest {
             long personId = -1;
 
             assertThrows(BPException.class, () -> service.findById(personId));
+        }
+    }
+
+    @Nested
+    class UploadPhotoTests {
+        /**
+         * {@link PersonService#findPhoto(Long)} should return {@link UploadPhotoResponse} with photo uuid.
+         * Test upload mock multipart file and check if uuid from service response equals mock photo uuid
+         */
+        @Test
+        public void upload_photo_should_return_photo_uuid_test() throws Exception {
+            UUID uuid = UUID.fromString("935921a7-692e-4ee4-a089-2695b68e9801");
+            MockMultipartFile mockMultipartFile = getMockMultipartFile();
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_PERSON))).willReturn(new UploadResponse(uuid, null));
+
+            UploadPhotoResponse response = service.uploadPhoto(mockMultipartFile);
+
+            assertEquals(response.uuid(), uuid);
+        }
+
+        /**
+         * {@link PersonService#findPhoto(Long)} should return {@link BPException} if storage service return not null error field.
+         * Test upload mock multipart file and check if service throw {@link BPException} on not null error field
+         */
+        @Test
+        public void upload_photo_should_return_bpexception_if_storage_service_return_not_null_error_field_test() throws Exception {
+            MockMultipartFile mockMultipartFile = getMockMultipartFile();
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_PERSON))).willReturn(new UploadResponse(null, "Some error"));
+
+            assertThrows(BPException.class, () -> service.uploadPhoto(mockMultipartFile));
+        }
+    }
+
+    @Nested
+    class FindPhotoTests {
+        /**
+         * {@link PersonService#findPhoto(Long)} should return photo from storage service.
+         * Test try to get photo by person id and then check InputStreamResource from file storage and file system equals
+         * then check if hash codes of InputStreamResource from file storage and file system equals
+         */
+        @Test
+        public void find_photo_should_return_photo_uuid_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT person_id FROM persons_person WHERE photo_uuid = '935921a7-692e-4ee4-a089-2695b68e9801'", Long.class);
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_PERSON))).willReturn(photo);
+
+            InputStreamResource returnedResource = service.findPhoto(personId);
+
+            assertEquals(returnedResource, photo);
+            assertEquals(returnedResource.hashCode(), photo.hashCode());
+        }
+
+        /**
+         * {@link PersonService#findPhoto(Long)} should return {@link BPException} if photo uuid is null.
+         * Test try to get not existing photo by person id and then check if {@link BPException} throws
+         */
+        @Test
+        public void find_photo_should_bpexception_if_person_photo_uuid_is_null_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT person_id FROM persons_person WHERE photo_uuid IS NULL LIMIT 1", Long.class);
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_PERSON))).willReturn(photo);
+
+            assertThrows(BPException.class, () -> service.findPhoto(personId));
+        }
+
+        /**
+         * {@link PersonService#findPhoto(Long)} should return {@link BPException} if person not found.
+         * Test try to get photo of not existing person and then check if {@link BPException} throws
+         */
+        @Test
+        public void find_photo_should_bpexception_if_person_not_found_test() throws Exception {
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_PERSON))).willReturn(photo);
+
+            assertThrows(BPException.class, () -> service.findPhoto(-1L));
         }
     }
 }

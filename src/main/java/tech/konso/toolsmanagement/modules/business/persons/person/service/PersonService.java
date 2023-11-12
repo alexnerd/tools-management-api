@@ -2,24 +2,27 @@ package tech.konso.toolsmanagement.modules.business.persons.person.service;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tech.konso.toolsmanagement.modules.business.persons.label.service.LabelService;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonFilterInfo;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonFilterResponse;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonInfo;
-import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.PersonRequest;
+import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.dao.Person;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.repository.PersonRepository;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.specification.PersonSpecification;
 import tech.konso.toolsmanagement.modules.business.persons.person.service.mappers.PersonsDtoMapper;
 import tech.konso.toolsmanagement.modules.business.persons.role.service.RoleService;
-import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
+import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
+import tech.konso.toolsmanagement.modules.integration.facade.FileType;
+import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +43,10 @@ public class PersonService {
 
     @Autowired
     private PersonRepository repository;
+
+    @Autowired
+    @Qualifier("file-storage-facade-impl")
+    private FileStorageFacade fileStorageFacade;
 
     private PersonsDtoMapper personsDtoMapper;
 
@@ -134,6 +141,7 @@ public class PersonService {
         person.setJobTitle(rq.jobTitle());
         person.setIsArchived(rq.isArchived());
         person.setIsUnregistered(rq.isUnregistered());
+        person.setPhotoUuid(rq.photoUuid());
 
         person.removeLabels();
         rq.labels().stream().map(labelId -> labelService.getReference(labelId)).forEach(person::addLabel);
@@ -142,5 +150,41 @@ public class PersonService {
         rq.roles().stream().map(roleId -> roleService.getReference(roleId)).forEach(person::addRole);
 
         return person;
+    }
+
+    /**
+     * Upload {@link MultipartFile} photo to file storage service.
+     * <p>
+     * Example:
+     * <pre>
+     *     uploadPhoto(multipartFile);
+     * </pre>
+     *
+     * @param multipartFile {@link MultipartFile} photo for save to file storage
+     * @return {@link UploadPhotoResponse} object with file id
+     */
+    public UploadPhotoResponse uploadPhoto(MultipartFile multipartFile) {
+        UploadResponse rs = fileStorageFacade.upload(multipartFile, FileType.PHOTO_PERSON);
+        if (rs.error() != null) {
+            throw new BPException("Upload photo error: " + rs.error());
+        }
+        return new UploadPhotoResponse(rs.uuid());
+    }
+
+    /**
+     * Find photo by person id in file storage.
+     * <p>
+     * Example:
+     * <pre>
+     *     findPhoto(3);
+     * </pre>
+     *
+     * @param personId {@link Long} person id
+     * @return InputStreamResource with searching file
+     */
+    public InputStreamResource findPhoto(Long personId) {
+        UUID uuid = repository.findPhotoUuidByPersonId(personId)
+                .orElseThrow(() -> new BPException("Person not found id: " + personId));
+        return fileStorageFacade.download(uuid, FileType.PHOTO_PERSON);
     }
 }

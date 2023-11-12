@@ -20,6 +20,7 @@ import java.util.UUID;
  * @param jobTitle       person job title, must not be blank
  * @param isArchived     flag, must not be null
  * @param isUnregistered flag, must not be null
+ * @param photoUuid      UUID of person photo in file storage
  * @param labels         set of labels ids, must not be null
  * @param roles          set of roles ids, must not be null
  */
@@ -46,6 +47,8 @@ public record PersonRequest(
         @NotNull Boolean isArchived,
         @Schema(description = "unregistered flag, must not be null", example = "false")
         @NotNull Boolean isUnregistered,
+        @Schema(description = "UUID of person photo in file storage", example = "eee7339f-4977-4186-bb5a-3a73585efe65")
+        UUID photoUuid,
         @Schema(description = "label ids", example = "[19, 38]")
         @NotNull Set<Long> labels,
         @Schema(description = "roles ids", example = "[19, 38]")
