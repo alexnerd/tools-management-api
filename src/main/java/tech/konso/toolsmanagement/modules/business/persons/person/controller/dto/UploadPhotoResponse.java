@@ -7,10 +7,10 @@ import java.util.UUID;
 /**
  * DTO class for response to return saved photo uuid.
  *
- * @param uuid UUID of person photo in file storage
+ * @param uuid Person photo UUID in file storage
  */
-@Schema(description = "Response for return saved photo UUID of person in file storage")
+@Schema(description = "Response for return saved person photo UUID in file storage")
 public record UploadPhotoResponse(
-        @Schema(description = "UUID of person photo in file storage", example = "3d965e4e-cf28-45e1-91c7-1225566e6817")
+        @Schema(description = "Person photo UUID in file storage", example = "3d965e4e-cf28-45e1-91c7-1225566e6817")
         UUID uuid) {
 }
