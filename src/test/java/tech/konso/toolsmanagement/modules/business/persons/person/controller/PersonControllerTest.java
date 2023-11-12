@@ -8,10 +8,8 @@ import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,7 +23,6 @@ import tech.konso.toolsmanagement.modules.business.persons.person.service.Person
 import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
 import tech.konso.toolsmanagement.modules.integration.facade.FileType;
 import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
-import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,7 +35,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -109,14 +107,6 @@ public class PersonControllerTest extends AbstractControllerTest {
     private byte[] getPhoto(String filePath) throws IOException {
         Path path = Path.of(filePath);
         return Files.readAllBytes(path);
-    }
-
-    private MockMultipartFile getMockMultipartFile() throws IOException {
-        return new MockMultipartFile(
-                "file",
-                "file.jpeg",
-                MediaType.IMAGE_JPEG_VALUE,
-                getPhoto(PATH_TO_JPEG_FILE));
     }
 
     @Nested
@@ -1202,7 +1192,6 @@ public class PersonControllerTest extends AbstractControllerTest {
          */
         @Test
         public void upload_photo_should_return_bad_request_if_photo_not_upload_test() throws Exception {
-            MockMultipartFile mockMultipartFile = getMockMultipartFile();
             BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_PERSON))).willReturn(new UploadResponse(null, "Some error"));
 
             mockMvc.perform(MockMvcRequestBuilders.multipart(urlEndpoint() + "/photo")
