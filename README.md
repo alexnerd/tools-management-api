@@ -67,3 +67,7 @@ http://localhost:8080/tools-management-api/actuator
 
 ## Healthcheks
 http://localhost:8080/tools-management-api/actuator/health
+
+## Other resources
+https://www.figma.com
+https://miro.com
