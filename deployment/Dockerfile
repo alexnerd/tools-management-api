@@ -7,4 +7,8 @@ RUN mvn -f /usr/src/app/pom.xml clean package -Dmaven.test.skip
 FROM --platform=linux/arm64/v8 openjdk:21-oraclelinux8
 LABEL maintainer="Aleksey Popov, alexnerd.com" description="Image with JDK 21 and tools managment application"
 COPY --from=build /usr/src/app/target/tools-management.jar /usr/share/tools-management.jar
+
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+USER appuser
+
 ENTRYPOINT ["java", "-jar", "/usr/share/tools-management.jar"]
