@@ -4,23 +4,40 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.multipart.MultipartFile;
 import tech.konso.toolsmanagement.modules.business.tools.commons.AbstractControllerTest;
 import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolFilterInfo;
 import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolFilterResponse;
 import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolRequest;
+import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.UploadPhotoResponse;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.Tool;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.enums.OwnershipType;
 import tech.konso.toolsmanagement.modules.business.tools.tool.service.ToolService;
+import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
+import tech.konso.toolsmanagement.modules.integration.facade.FileType;
+import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,11 +59,17 @@ public class ToolControllerTest extends AbstractControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @MockBean
+    private FileStorageFacade fileStorageFacade;
+
+    private static final UUID PHOTO_UUID = UUID.fromString("3e87966b-9566-437d-8d54-2052fbb7af5f");
+
+    private final static String PATH_TO_JPEG_FILE = "src/test/resources/photo/TEST_PHOTO.jpeg";
 
 
     @BeforeEach
     public void setUp() {
-        jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_1', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9801')");
+        jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid, photo_uuid) VALUES ('tool_1', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9801', '935921a7-692e-4ee4-a089-2695b68e9801')");
         jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_2', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9802')");
         jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_3', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9803')");
         jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_4', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9804')");
@@ -80,6 +103,11 @@ public class ToolControllerTest extends AbstractControllerTest {
                 .isKit(false)
                 .isArchived(false)
                 .labels(Collections.emptySet());
+    }
+
+    private byte[] getPhoto(String filePath) throws IOException {
+        Path path = Path.of(filePath);
+        return Files.readAllBytes(path);
     }
 
     @Nested
@@ -719,6 +747,80 @@ public class ToolControllerTest extends AbstractControllerTest {
             mockMvc.perform(post(urlEndpoint())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rq)))
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    class FindPhoto {
+        /**
+         * {@link ToolController#findPhoto(Long)} should return photo from storage service.
+         * Test try to get photo by tool id and then check status code 200, content type and
+         * check if bytes of photo from storage service equals bytes from file system
+         */
+        @Test
+        public void find_photo_should_return_photo_uuid_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE photo_uuid IS NOT NULL LIMIT 1", Long.class);
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_TOOL))).willReturn(photo);
+
+            mockMvc.perform(get(urlEndpoint() + "/" + personId + "/photo"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_JPEG_VALUE))
+                    .andExpect(content().bytes(getPhoto(PATH_TO_JPEG_FILE)));
+        }
+
+        /**
+         * {@link ToolController#findPhoto(Long)} should return bad request when photo not found.
+         * Test try to get photo by tool id and then check status code bad request
+         */
+        @Test
+        public void find_photo_should_return_bad_request_if_photo_not_found_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE photo_uuid IS NULL LIMIT 1", Long.class);
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_TOOL))).willReturn(photo);
+
+            mockMvc.perform(get(urlEndpoint() + "/" + personId + "/photo"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest());
+        }
+    }
+
+    @Nested
+    class UploadPhoto {
+        /**
+         * {@link ToolController#uploadPhoto(MultipartFile)} should return photo uuid from storage service.
+         * Test try to upload photo and then check status code 200, content type and if photo uuid equals uuid in mock object.
+         */
+        @Test
+        public void upload_photo_should_return_photo_uuid_test() throws Exception {
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_TOOL))).willReturn(new UploadResponse(PHOTO_UUID, null));
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart(urlEndpoint() + "/photo")
+                            .file("attachment", getPhoto(PATH_TO_JPEG_FILE)))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                    .andExpect(content().string(dtoMatcher(
+                            UploadPhotoResponse.class,
+                            dto -> dto.uuid().equals(PHOTO_UUID)
+                    )));
+        }
+
+        /**
+         * {@link ToolController#uploadPhoto(MultipartFile)} should return bad request if photo not upload.
+         * Test try to upload photo and then check status code 400.
+         */
+        @Test
+        public void upload_photo_should_return_bad_request_if_photo_not_upload_test() throws Exception {
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_TOOL))).willReturn(new UploadResponse(null, "Some error"));
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart(urlEndpoint() + "/photo")
+                            .file("attachment", getPhoto(PATH_TO_JPEG_FILE)))
+                    .andDo(print())
                     .andExpect(status().isBadRequest());
         }
     }

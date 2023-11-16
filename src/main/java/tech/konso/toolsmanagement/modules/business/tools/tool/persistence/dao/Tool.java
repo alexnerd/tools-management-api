@@ -119,6 +119,13 @@ public class Tool implements Serializable {
     private UUID kitUuid;
 
     /**
+     * Uuid of photo in file storage
+     */
+    @Setter
+    @Column(name = "photo_uuid")
+    private UUID photoUuid;
+
+    /**
      * Tool brand
      * Foreign key - id of tools_brand table
      */

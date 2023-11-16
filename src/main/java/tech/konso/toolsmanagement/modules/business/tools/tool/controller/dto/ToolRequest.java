@@ -27,6 +27,7 @@ import java.util.UUID;
  * @param rentTill        last day of tool rent
  * @param isKit           flag is the tool a kit, must not be null
  * @param kitUuid         kit uuid
+ * @param photoUuid       photo uuid
  * @param brandId         identifier of the tool brand
  * @param categoryId      identifier of the category brand
  * @param labels          set of labels ids, must not be null
@@ -63,6 +64,8 @@ public record ToolRequest(
         Boolean isKit,
         @Schema(description = "kit uuid", example = "3996a6ee-c40e-4401-b8c8-2f96f49d0c22", nullable = true)
         UUID kitUuid,
+        @Schema(description = "photo uuid", example = "eee7339f-4977-4186-bb5a-3a73585efe65", nullable = true)
+        UUID photoUuid,
         @Schema(description = "brand id", example = "21", nullable = true)
         Long brandId,
         @Schema(description = "category id", example = "17", nullable = true)

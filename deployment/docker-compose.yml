@@ -65,8 +65,8 @@ services:
       timeout: 1s
       retries: 3
 
-  minio-bucket:
-    container_name: minio-bucket
+  minio-bucket-photo-person:
+    container_name: minio-bucket-photo-person
     image: minio/mc
     depends_on:
       - minio
@@ -75,6 +75,19 @@ services:
       /usr/bin/mc alias set tools_minio http://minio:9000 tools_management_user SuperSecret;
       /usr/bin/mc mb tools_minio/photopersonbucket;
       /usr/bin/mc anonymous set public tools_minio/photopersonbucket;
+      exit 0;
+      "
+
+  minio-bucket-photo-tool:
+    container_name: minio-bucket-photo-tool
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set tools_minio http://minio:9000 tools_management_user SuperSecret;
+      /usr/bin/mc mb tools_minio/phototoolbucket;
+      /usr/bin/mc anonymous set public tools_minio/phototoolbucket;
       exit 0;
       "
 
@@ -107,7 +120,8 @@ services:
       MINIO_LOGIN: tools_management_user
       MINIO_PASSWORD: SuperSecret
       MINIO_ENDPOINT: "http://minio:9000"
-      MINIO_PHOTO_BUCKET: photopersonbucket
+      MINIO_PHOTO_PERSON_BUCKET: photopersonbucket
+      MINIO_PHOTO_TOOL_BUCKET: phototoolbucket
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/file-storage-api/actuator/health" ]
       interval: 5s

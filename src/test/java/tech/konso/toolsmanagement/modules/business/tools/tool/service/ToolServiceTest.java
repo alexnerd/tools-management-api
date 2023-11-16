@@ -2,23 +2,37 @@ package tech.konso.toolsmanagement.modules.business.tools.tool.service;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockMultipartFile;
 import tech.konso.toolsmanagement.PostgreSQLContainerExtension;
+import tech.konso.toolsmanagement.modules.business.persons.person.service.PersonService;
 import tech.konso.toolsmanagement.modules.business.tools.brand.persistence.dao.Brand;
 import tech.konso.toolsmanagement.modules.business.tools.category.persistence.dao.Category;
 import tech.konso.toolsmanagement.modules.business.tools.label.persistence.dao.Label;
 import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.Tool;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.enums.OwnershipType;
+import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
+import tech.konso.toolsmanagement.modules.integration.facade.FileType;
+import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Collections;
@@ -29,6 +43,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static tech.konso.toolsmanagement.modules.business.tools.tool.persistence.specification.ToolSpecification.*;
 import static tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification.specBuilder;
 
@@ -54,9 +70,14 @@ public class ToolServiceTest {
     @Autowired
     private ToolService service;
 
+    @MockBean
+    private FileStorageFacade fileStorageFacade;
+
+    private final static String PATH_TO_JPEG_FILE = "src/test/resources/photo/TEST_PHOTO.jpeg";
+
     @BeforeEach
     public void setUp() {
-        jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_1', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9801')");
+        jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid, photo_uuid) VALUES ('tool_1', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9801', '935921a7-692e-4ee4-a089-2695b68e9801')");
         jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_2', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9802')");
         jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_3', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9803')");
         jdbcTemplate.update("INSERT INTO tools_tool (name, ownership_type, uuid) VALUES ('tool_4', 'OWN', '935921a7-692e-4ee4-a089-2695b68e9804')");
@@ -85,6 +106,19 @@ public class ToolServiceTest {
                 .isKit(false)
                 .isArchived(false)
                 .labels(Collections.emptySet());
+    }
+
+    private byte[] getPhoto(String filePath) throws IOException {
+        Path path = Path.of(filePath);
+        return Files.readAllBytes(path);
+    }
+
+    private MockMultipartFile getMockMultipartFile() throws IOException {
+        return new MockMultipartFile(
+                "file",
+                "file.jpeg",
+                MediaType.IMAGE_JPEG_VALUE,
+                getPhoto(PATH_TO_JPEG_FILE));
     }
 
     @Nested
@@ -1316,6 +1350,84 @@ public class ToolServiceTest {
 
             assertEquals(6, foundedTools.getTotalElements());
             assertEquals(1, foundedTools.getContent().size());
+        }
+    }
+
+    @Nested
+    class UploadPhotoTests {
+        /**
+         * {@link ToolService#findPhoto(Long)} should return {@link UploadPhotoResponse} with photo uuid.
+         * Test upload mock multipart file and check if uuid from service response equals mock photo uuid
+         */
+        @Test
+        public void upload_photo_should_return_photo_uuid_test() throws Exception {
+            UUID uuid = UUID.fromString("935921a7-692e-4ee4-a089-2695b68e9801");
+            MockMultipartFile mockMultipartFile = getMockMultipartFile();
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_TOOL))).willReturn(new UploadResponse(uuid, null));
+
+            UploadPhotoResponse response = service.uploadPhoto(mockMultipartFile);
+
+            assertEquals(response.uuid(), uuid);
+        }
+
+        /**
+         * {@link PersonService#findPhoto(Long)} should return {@link BPException} if storage service return not null error field.
+         * Test upload mock multipart file and check if service throw {@link BPException} on not null error field
+         */
+        @Test
+        public void upload_photo_should_return_bpexception_if_storage_service_return_not_null_error_field_test() throws Exception {
+            MockMultipartFile mockMultipartFile = getMockMultipartFile();
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_TOOL))).willReturn(new UploadResponse(null, "Some error"));
+
+            assertThrows(BPException.class, () -> service.uploadPhoto(mockMultipartFile));
+        }
+    }
+
+    @Nested
+    class FindPhotoTests {
+        /**
+         * {@link ToolService#findPhoto(Long)} should return photo from storage service.
+         * Test try to get photo by tool id and then check InputStreamResource from file storage and file system equals
+         * then check if hash codes of InputStreamResource from file storage and file system equals
+         */
+        @Test
+        public void find_photo_should_return_photo_uuid_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE photo_uuid = '935921a7-692e-4ee4-a089-2695b68e9801'", Long.class);
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_TOOL))).willReturn(photo);
+
+            InputStreamResource returnedResource = service.findPhoto(personId);
+
+            assertEquals(returnedResource, photo);
+            assertEquals(returnedResource.hashCode(), photo.hashCode());
+        }
+
+        /**
+         * {@link ToolService#findPhoto(Long)} should return {@link BPException} if photo uuid is null.
+         * Test try to get not existing photo by tool id and then check if {@link BPException} throws
+         */
+        @Test
+        public void find_photo_should_bpexception_if_tool_photo_uuid_is_null_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT tool_id FROM tools_tool WHERE photo_uuid IS NULL LIMIT 1", Long.class);
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_TOOL))).willReturn(photo);
+
+            assertThrows(BPException.class, () -> service.findPhoto(personId));
+        }
+
+        /**
+         * {@link ToolService#findPhoto(Long)} should return {@link BPException} if tool not found.
+         * Test try to get photo of not existing tool and then check if {@link BPException} throws
+         */
+        @Test
+        public void find_photo_should_bpexception_if_tool_not_found_test() throws Exception {
+            InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
+            InputStreamResource photo = new InputStreamResource(is);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_TOOL))).willReturn(photo);
+
+            assertThrows(BPException.class, () -> service.findPhoto(-1L));
         }
     }
 }

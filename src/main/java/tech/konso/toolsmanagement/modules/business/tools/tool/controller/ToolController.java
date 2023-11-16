@@ -9,16 +9,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolFilterInfo;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolFilterResponse;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolInfo;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolRequest;
+import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.Tool;
 import tech.konso.toolsmanagement.modules.business.tools.tool.service.ToolService;
 
@@ -97,5 +96,20 @@ public class ToolController {
                 .buildAndExpand(tool.getId())
                 .toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @Operation(summary = "Get tool photo by tool id")
+    @Parameters({
+            @Parameter(name = "id", description = "id of tool", example = "7", required = true)
+    })
+    @GetMapping(value = "/{id}/photo", produces = MediaType.IMAGE_JPEG_VALUE)
+    public InputStreamResource findPhoto(@PathVariable("id") Long id) {
+        return service.findPhoto(id);
+    }
+
+    @Operation(summary = "Upload tool photo")
+    @PostMapping(value = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public UploadPhotoResponse uploadPhoto(@RequestPart("attachment") MultipartFile multipartFile) {
+        return service.uploadPhoto(multipartFile);
     }
 }

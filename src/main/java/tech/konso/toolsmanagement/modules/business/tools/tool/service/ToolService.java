@@ -2,24 +2,26 @@ package tech.konso.toolsmanagement.modules.business.tools.tool.service;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import tech.konso.toolsmanagement.modules.business.tools.brand.service.BrandService;
 import tech.konso.toolsmanagement.modules.business.tools.category.service.CategoryService;
 import tech.konso.toolsmanagement.modules.business.tools.label.service.LabelService;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolFilterInfo;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolFilterResponse;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolInfo;
+import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.Tool;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.dao.enums.OwnershipType;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.repository.ToolRepository;
 import tech.konso.toolsmanagement.modules.business.tools.tool.persistence.specification.ToolSpecification;
 import tech.konso.toolsmanagement.modules.business.tools.tool.service.mappers.ToolsDtoMapper;
-import tech.konso.toolsmanagement.modules.business.tools.tool.controller.dto.ToolRequest;
+import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
+import tech.konso.toolsmanagement.modules.integration.facade.FileType;
+import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
 import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
@@ -45,6 +47,9 @@ public class ToolService {
 
     @Autowired
     private ToolRepository repository;
+
+    @Autowired
+    private FileStorageFacade fileStorageFacade;
 
     private ToolsDtoMapper toolsDtoMapper;
 
@@ -141,6 +146,7 @@ public class ToolService {
         tool.setRentTill(rq.rentTill());
         tool.setIsKit(rq.isKit());
         tool.setKitUuid(rq.kitUuid());
+        tool.setPhotoUuid(rq.photoUuid());
         tool.setBrand(rq.brandId() == null ? null : brandService.getReference(rq.brandId()));
         tool.setCategory(rq.categoryId() == null ? null : categoryService.getReference(rq.categoryId()));
 
@@ -149,5 +155,41 @@ public class ToolService {
 
         tool.setIsArchived(rq.isArchived());
         return tool;
+    }
+
+    /**
+     * Upload {@link MultipartFile} photo to file storage service.
+     * <p>
+     * Example:
+     * <pre>
+     *     uploadPhoto(multipartFile);
+     * </pre>
+     *
+     * @param multipartFile {@link MultipartFile} photo for save to file storage
+     * @return {@link UploadPhotoResponse} object with file id
+     */
+    public  UploadPhotoResponse uploadPhoto(MultipartFile multipartFile) {
+        UploadResponse rs = fileStorageFacade.upload(multipartFile, FileType.PHOTO_TOOL);
+        if (rs.error() != null) {
+            throw new BPException("Upload photo error: " + rs.error());
+        }
+        return new UploadPhotoResponse(rs.uuid());
+    }
+
+    /**
+     * Find photo by tool id in file storage.
+     * <p>
+     * Example:
+     * <pre>
+     *     findPhoto(3);
+     * </pre>
+     *
+     * @param toolId {@link Long} tool id
+     * @return InputStreamResource with searching file
+     */
+    public InputStreamResource findPhoto(Long toolId) {
+        UUID uuid = repository.findPhotoUuidByToolId(toolId)
+                .orElseThrow(() -> new BPException("Tool not found id: " + toolId));
+        return fileStorageFacade.download(uuid, FileType.PHOTO_TOOL);
     }
 }
