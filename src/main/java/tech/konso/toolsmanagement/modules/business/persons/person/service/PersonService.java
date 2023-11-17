@@ -11,13 +11,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import tech.konso.toolsmanagement.modules.business.persons.label.service.LabelService;
 import tech.konso.toolsmanagement.modules.business.persons.person.controller.dto.*;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.dao.Person;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.repository.PersonRepository;
 import tech.konso.toolsmanagement.modules.business.persons.person.persistence.specification.PersonSpecification;
 import tech.konso.toolsmanagement.modules.business.persons.person.service.mappers.PersonsDtoMapper;
-import tech.konso.toolsmanagement.modules.business.persons.role.service.RoleService;
+import tech.konso.toolsmanagement.modules.business.persons.person.service.mappers.PersonsEntityMapper;
 import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
 import tech.konso.toolsmanagement.modules.integration.facade.FileType;
 import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
@@ -36,13 +35,10 @@ import static tech.konso.toolsmanagement.system.commons.specification.AbstractSp
 public class PersonService {
 
     @Autowired
-    private RoleService roleService;
-
-    @Autowired
-    private LabelService labelService;
-
-    @Autowired
     private PersonRepository repository;
+
+    @Autowired
+    private PersonsEntityMapper entityMapper;
 
     @Autowired
     @Qualifier("file-storage-facade-impl")
@@ -111,45 +107,10 @@ public class PersonService {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
                         .orElseThrow(() -> new BPException("Person not found id: " + id))
-                ).map(person -> toEntity(person, rq))
+                ).map(person -> entityMapper.toEntity(person, rq))
                 .orElseGet(() ->
-                        repository.save(toEntity(new Person(), rq))
+                        repository.save(entityMapper.toEntity(new Person(), rq))
                 );
-    }
-
-    /**
-     * Converts {@link PersonRequest} to {@link Person} object.
-     * <p>
-     * Example:
-     * <pre>
-     *     toEntity(new Person(), rq);
-     * </pre>
-     *
-     * @param person {@link Person} object for save to database or update existing
-     * @param rq {@link PersonRequest} object for converting to {@link Person}
-     * @return {@link Person} saved object
-     */
-    private Person toEntity(Person person, PersonRequest rq) {
-        if (person.getId() == null) {
-            person.setUuid(UUID.randomUUID());
-        }
-        person.setPhoneNumber(rq.phoneNumber());
-        person.setCompanyUuid(rq.companyUuid());
-        person.setSurname(rq.surname());
-        person.setName(rq.name());
-        person.setPatronymic(rq.patronymic());
-        person.setJobTitle(rq.jobTitle());
-        person.setIsArchived(rq.isArchived());
-        person.setIsUnregistered(rq.isUnregistered());
-        person.setPhotoUuid(rq.photoUuid());
-
-        person.removeLabels();
-        rq.labels().stream().map(labelId -> labelService.getReference(labelId)).forEach(person::addLabel);
-
-        person.removeRoles();
-        rq.roles().stream().map(roleId -> roleService.getReference(roleId)).forEach(person::addRole);
-
-        return person;
     }
 
     /**
