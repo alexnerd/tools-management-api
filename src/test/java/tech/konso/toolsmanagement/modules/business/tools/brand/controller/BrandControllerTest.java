@@ -88,17 +88,17 @@ public class BrandControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link BrandController#find(Long)} should return bad request if {@link Brand} with id not exist in database.
+         * {@link BrandController#find(Long)} should return not found if {@link Brand} with id not exist in database.
          * Test try to find brand whit id = -1 (negative number guaranties, that no such id exists in database)
-         * and check if controller return bad request with detailed error message in header.
+         * and check if controller return not found with detailed error message in header.
          */
         @Test
-        public void find_should_return_bad_request_test() throws Exception {
+        public void find_should_return_not_found_test() throws Exception {
             long brandId = -1L;
 
             mockMvc.perform(get(urlEndpoint() + "/" + brandId))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isNotFound())
                     .andExpect(header().stringValues("detail", "Brand not found id: " + brandId));
         }
     }
@@ -502,12 +502,12 @@ public class BrandControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link BrandController#update(BrandRequest)} should return bad request if brand with searching id not exist in database.
+         * {@link BrandController#update(BrandRequest)} should return not found if brand with searching id not exist in database.
          * Test send request for update by not existing id.
-         * Then checks if controller response with bad request.
+         * Then checks if controller response with not found.
          */
         @Test
-        public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
+        public void update_should_return_not_found_for_not_existing_id_test() throws Exception {
             BrandRequest rq = getDefaultBrandRequest()
                     .id(-1L)
                     .name("MAKITA")
@@ -516,7 +516,7 @@ public class BrandControllerTest extends AbstractControllerTest {
             mockMvc.perform(put(urlEndpoint())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rq)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotFound());
         }
     }
 

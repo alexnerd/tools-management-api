@@ -22,8 +22,7 @@ public class RestExceptionHandler {
     public ResponseEntity<?> handleBusinessException(BPException ex, WebRequest request) {
         log.error(ex.getMessage(), ex);
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .contentType(MediaType.APPLICATION_JSON)
+                .status(ex.getStatus())
                 .header("detail", ex.getMessage())
                 .build();
     }

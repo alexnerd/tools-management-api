@@ -89,17 +89,17 @@ public class LabelControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link LabelController#find(Long)} should return bad request if {@link Label} with id not exist in database.
+         * {@link LabelController#find(Long)} should return not found if {@link Label} with id not exist in database.
          * Test try to find label whit id = -1 (negative number guaranties, that no such id exists in database)
-         * and check if controller return bad request with detailed error message in header.
+         * and check if controller return not found with detailed error message in header.
          */
         @Test
-        public void find_should_return_bad_request_test() throws Exception {
+        public void find_should_return_not_found_test() throws Exception {
             long labelId = -1L;
 
             mockMvc.perform(get(urlEndpoint() + "/" + labelId))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isNotFound())
                     .andExpect(header().stringValues("detail", "Label not found id: " + labelId));
         }
     }
@@ -500,12 +500,12 @@ public class LabelControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link LabelController#update(LabelRequest)} should return bad request if label with searching id not exist in database.
+         * {@link LabelController#update(LabelRequest)} should return not found if label with searching id not exist in database.
          * Test send request for update by not existing id.
-         * Then checks if controller response with bad request.
+         * Then checks if controller response with not found.
          */
         @Test
-        public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
+        public void update_should_return_not_found_for_not_existing_id_test() throws Exception {
             LabelRequest rq = getDefaultLabelRequest()
                     .id(-1L)
                     .name("test")
@@ -514,7 +514,7 @@ public class LabelControllerTest extends AbstractControllerTest {
             mockMvc.perform(put(urlEndpoint())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rq)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotFound());
         }
     }
 

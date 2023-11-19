@@ -54,7 +54,7 @@ public class CategoryService {
     public CategoryInfo findById(Long id) {
         return repository.findById(id)
                 .map(category -> mapper.mapToCategoryInfo(category))
-                .orElseThrow(() -> new BPException("Category not found id: " + id));
+                .orElseThrow(() -> new BPException.NotFound("Category not found id: " + id));
     }
 
     /**
@@ -117,10 +117,10 @@ public class CategoryService {
     public Category save(CategoryRequest rq) {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
-                        .orElseThrow(() -> new BPException("Category not found id: " + id))
+                        .orElseThrow(() -> new BPException.NotFound("Category not found id: " + id))
                 ).map(category -> {
                     if (category.getId().equals(rq.parentCategoryId())) {
-                        throw new BPException("Category id and parent category id must not be the same, id: "
+                        throw new BPException.BadRequest("Category id and parent category id must not be the same, id: "
                                 + rq.parentCategoryId());
                     }
                     return toEntity(category, rq);

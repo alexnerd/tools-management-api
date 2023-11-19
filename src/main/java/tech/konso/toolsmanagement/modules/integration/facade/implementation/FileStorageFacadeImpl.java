@@ -4,15 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
 import tech.konso.toolsmanagement.modules.integration.facade.FileType;
 import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.util.UUID;
 
@@ -51,7 +54,10 @@ public class FileStorageFacadeImpl implements FileStorageFacade {
                 .body(BodyInserters.fromMultipartData("attachment", multipartFile.getResource()))
                 .retrieve()
                 .bodyToMono(UploadResponse.class)
-                .doOnError(e -> log.error("Error upload photo to file storage", e))
+                .doOnError(e -> {
+                    log.error("Error upload photo to file storage", e);
+                    throw new BPException.ServiceUnavailable("Error upload photo to file storage");
+                })
                 .block();
     }
 
@@ -70,8 +76,13 @@ public class FileStorageFacadeImpl implements FileStorageFacade {
                         .build(id))
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals, rs -> Mono.error(new BPException.NotFound("File not found " + id)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, rs -> Mono.error(new BPException.BadRequest("Error retrieving file from storage " + id)))
                 .bodyToMono(InputStreamResource.class)
-                .doOnError(e -> log.error("Error file storage request for get photo by id {}", id, e))
+                .doOnError(e -> {
+                    log.error("File storage service unavailable. Try to et photo by id {}", id, e);
+                    throw new BPException.ServiceUnavailable("File storage service unavailable. Try to et photo by id: " + id);
+                })
                 .block();
     }
 }

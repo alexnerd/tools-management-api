@@ -62,7 +62,7 @@ public class ToolService {
      * @throws BPException if tool not exists in database
      */
     public ToolInfo findById(Long id) {
-        return repository.findById(id).map(toolsDtoMapper::mapToToolInfo).orElseThrow(() -> new BPException("Tool not found id: " + id));
+        return repository.findById(id).map(toolsDtoMapper::mapToToolInfo).orElseThrow(() -> new BPException.NotFound("Tool not found id: " + id));
     }
 
     /**
@@ -104,7 +104,7 @@ public class ToolService {
     public Tool save(ToolRequest rq) {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
-                        .orElseThrow(() -> new BPException("Tool not found id: " + id))
+                        .orElseThrow(() -> new BPException.NotFound("Tool not found id: " + id))
                 ).map(tool -> entityMapper.toEntity(tool, rq))
                 .orElseGet(() ->
                         repository.save(entityMapper.toEntity(new Tool(), rq))
@@ -125,7 +125,7 @@ public class ToolService {
     public  UploadPhotoResponse uploadPhoto(MultipartFile multipartFile) {
         UploadResponse rs = fileStorageFacade.upload(multipartFile, FileType.PHOTO_TOOL);
         if (rs.error() != null) {
-            throw new BPException("Upload photo error: " + rs.error());
+            throw new BPException.ServiceUnavailable("Upload photo error: " + rs.error());
         }
         return new UploadPhotoResponse(rs.uuid());
     }
@@ -143,7 +143,7 @@ public class ToolService {
      */
     public InputStreamResource findPhoto(Long toolId) {
         UUID uuid = repository.findPhotoUuidByToolId(toolId)
-                .orElseThrow(() -> new BPException("Tool not found id: " + toolId));
+                .orElseThrow(() -> new BPException.NotFound("Photo uuid not found in tool id: " + toolId));
         return fileStorageFacade.download(uuid, FileType.PHOTO_TOOL);
     }
 }

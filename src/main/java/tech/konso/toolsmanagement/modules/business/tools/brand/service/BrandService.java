@@ -40,7 +40,7 @@ public class BrandService {
      * @throws BPException if brand not exists in database
      */
     public Brand findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new BPException("Brand not found id: " + id));
+        return repository.findById(id).orElseThrow(() -> new BPException.NotFound("Brand not found id: " + id));
     }
 
     /**
@@ -98,7 +98,7 @@ public class BrandService {
     public Brand save(BrandRequest rq) {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
-                        .orElseThrow(() -> new BPException("Brand not found id: " + id))
+                        .orElseThrow(() -> new BPException.NotFound("Brand not found id: " + id))
                 ).map(brand -> toEntity(brand, rq))
                 .orElseGet(() ->
                         repository.save(toEntity(new Brand(), rq))

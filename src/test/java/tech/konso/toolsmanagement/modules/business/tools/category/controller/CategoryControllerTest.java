@@ -114,17 +114,17 @@ public class CategoryControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link CategoryController#find(Long)} should return bad request if {@link Category} with id not exist in database.
+         * {@link CategoryController#find(Long)} should return not found if {@link Category} with id not exist in database.
          * Test try to find category whit id = -1 (negative number guaranties, that no such id exists in database)
-         * and check if controller return bad request with detailed error message in header.
+         * and check if controller return not found with detailed error message in header.
          */
         @Test
-        public void find_should_return_bad_request_test() throws Exception {
+        public void find_should_return_not_found_test() throws Exception {
             long categoryId = -1L;
 
             mockMvc.perform(get(urlEndpoint() + "/" + categoryId))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isNotFound())
                     .andExpect(header().stringValues("detail", "Category not found id: " + categoryId));
         }
     }
@@ -546,12 +546,12 @@ public class CategoryControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link CategoryController#update(CategoryRequest)} should return bad request if category with searching id not exist in database.
+         * {@link CategoryController#update(CategoryRequest)} should return not found if category with searching id not exist in database.
          * Test send request for update by not existing id.
-         * Then checks if controller response with bad request.
+         * Then checks if controller response with not found.
          */
         @Test
-        public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
+        public void update_should_return_not_found_for_not_existing_id_test() throws Exception {
             CategoryRequest rq = getDefaultCategoryRequest()
                     .id(-1L)
                     .name("HandTool")
@@ -561,7 +561,7 @@ public class CategoryControllerTest extends AbstractControllerTest {
             mockMvc.perform(put(urlEndpoint())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rq)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotFound());
         }
     }
 

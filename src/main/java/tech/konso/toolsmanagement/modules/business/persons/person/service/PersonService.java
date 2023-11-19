@@ -64,7 +64,8 @@ public class PersonService {
      * @throws BPException if person not exists in database
      */
     public PersonInfo findById(Long id) {
-        return repository.findById(id).map(personsDtoMapper::mapToPersonInfo).orElseThrow(() -> new BPException("Person not found id: " + id));
+        return repository.findById(id).map(personsDtoMapper::mapToPersonInfo).orElseThrow(() ->
+                new BPException.NotFound("Person not found id: " + id));
     }
 
     /**
@@ -106,7 +107,7 @@ public class PersonService {
     public Person save(PersonRequest rq) {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
-                        .orElseThrow(() -> new BPException("Person not found id: " + id))
+                        .orElseThrow(() -> new BPException.NotFound("Person not found id: " + id))
                 ).map(person -> entityMapper.toEntity(person, rq))
                 .orElseGet(() ->
                         repository.save(entityMapper.toEntity(new Person(), rq))
@@ -127,7 +128,7 @@ public class PersonService {
     public UploadPhotoResponse uploadPhoto(MultipartFile multipartFile) {
         UploadResponse rs = fileStorageFacade.upload(multipartFile, FileType.PHOTO_PERSON);
         if (rs.error() != null) {
-            throw new BPException("Upload photo error: " + rs.error());
+            throw new BPException.ServiceUnavailable("Upload photo error: " + rs.error());
         }
         return new UploadPhotoResponse(rs.uuid());
     }
@@ -144,8 +145,8 @@ public class PersonService {
      * @return InputStreamResource with searching file
      */
     public InputStreamResource findPhoto(Long personId) {
-        UUID uuid = repository.findPhotoUuidByPersonId(personId)
-                .orElseThrow(() -> new BPException("Person not found id: " + personId));
+        UUID uuid = repository.findPhotoUuidByPersonId(personId).orElseThrow(() ->
+                new BPException.NotFound("Photo uuid not found in person id: " + personId));
         return fileStorageFacade.download(uuid, FileType.PHOTO_PERSON);
     }
 }

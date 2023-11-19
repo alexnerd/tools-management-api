@@ -23,6 +23,7 @@ import tech.konso.toolsmanagement.modules.business.persons.person.service.Person
 import tech.konso.toolsmanagement.modules.integration.facade.FileStorageFacade;
 import tech.konso.toolsmanagement.modules.integration.facade.FileType;
 import tech.konso.toolsmanagement.modules.integration.facade.dto.UploadResponse;
+import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -131,17 +132,17 @@ public class PersonControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link PersonController#find(Long)} should return bad request if {@link Person} with id not exist in database.
+         * {@link PersonController#find(Long)} should return not found if {@link Person} with id not exist in database.
          * Test try to find person whit id = -1 (negative number guaranties, that no such id exists in database)
-         * and check if controller return bad request with detailed error message in header.
+         * and check if controller return not found with detailed error message in header.
          */
         @Test
-        public void find_should_return_bad_request_test() throws Exception {
+        public void find_should_return_not_found_test() throws Exception {
             long personId = -1L;
 
             mockMvc.perform(get(urlEndpoint() + "/" + personId))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isNotFound())
                     .andExpect(header().stringValues("detail", "Person not found id: " + personId));
         }
     }
@@ -820,12 +821,12 @@ public class PersonControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link PersonController#update(PersonRequest)} should return bad request if person with searching id not exist in database.
+         * {@link PersonController#update(PersonRequest)} should return not found if person with searching id not exist in database.
          * Test send request for update by not existing id.
-         * Then checks if controller response with bad request.
+         * Then checks if controller response with not found.
          */
         @Test
-        public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
+        public void update_should_return_not_found_for_not_existing_id_test() throws Exception {
             PersonRequest rq = getDefaultPersonRequest()
                     .id(-1L)
                     .build();
@@ -833,7 +834,7 @@ public class PersonControllerTest extends AbstractControllerTest {
             mockMvc.perform(put(urlEndpoint())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rq)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotFound());
         }
 
         /**
@@ -1148,11 +1149,11 @@ public class PersonControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link PersonController#findPhoto(Long)} should return bad request when photo not found.
-         * Test try to get photo by person id and then check status code bad request
+         * {@link PersonController#findPhoto(Long)} should return not found when photo uuid not found in DB.
+         * Test try to get photo by person id and then check status code not found with detailed error message in header.
          */
         @Test
-        public void find_photo_should_return_bad_request_if_photo_not_found_test() throws Exception {
+        public void find_photo_should_return_not_found_if_photo_uuid_not_found_test() throws Exception {
             long personId = jdbcTemplate.queryForObject("SELECT person_id FROM persons_person WHERE photo_uuid IS NULL LIMIT 1", Long.class);
             InputStream is = new ByteArrayInputStream(getPhoto(PATH_TO_JPEG_FILE));
             InputStreamResource photo = new InputStreamResource(is);
@@ -1160,7 +1161,56 @@ public class PersonControllerTest extends AbstractControllerTest {
 
             mockMvc.perform(get(urlEndpoint() + "/" + personId + "/photo"))
                     .andDo(print())
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotFound())
+                    .andExpect(header().stringValues("detail", "Photo uuid not found in person id: " + personId));;
+        }
+
+        /**
+         * {@link PersonController#findPhoto(Long)} should return not found when photo not found in file storage.
+         * Test try to get photo by person id and then check status code not found with detailed error message in header.
+         */
+        @Test
+        public void find_photo_should_return_not_found_if_photo_not_found_in_storage_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT person_id FROM persons_person WHERE photo_uuid IS NOT NULL LIMIT 1", Long.class);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_PERSON)))
+                    .willThrow(new BPException.NotFound("not found"));
+
+            mockMvc.perform(get(urlEndpoint() + "/" + personId + "/photo"))
+                    .andDo(print())
+                    .andExpect(status().isNotFound())
+                    .andExpect(header().stringValues("detail", "not found"));;
+        }
+
+        /**
+         * {@link PersonController#findPhoto(Long)} should return bad request when file storage return bad request.
+         * Test try to get photo by person id and then check status code bad request with detailed error message in header.
+         */
+        @Test
+        public void find_photo_should_return_bad_request_if_file_storage_return_bad_request_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT person_id FROM persons_person WHERE photo_uuid IS NOT NULL LIMIT 1", Long.class);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_PERSON)))
+                    .willThrow(new BPException.BadRequest("error"));
+
+            mockMvc.perform(get(urlEndpoint() + "/" + personId + "/photo"))
+                    .andDo(print())
+                    .andExpect(status().isBadRequest())
+                    .andExpect(header().stringValues("detail", "error"));;
+        }
+
+        /**
+         * {@link PersonController#findPhoto(Long)} should return service unavailable if error acquire.
+         * Test try to get photo by person id and then check status code service unavailable with detailed error message in header.
+         */
+        @Test
+        public void find_photo_should_return_service_unavailable_if_error_acquire_test() throws Exception {
+            long personId = jdbcTemplate.queryForObject("SELECT person_id FROM persons_person WHERE photo_uuid IS NOT NULL LIMIT 1", Long.class);
+            BDDMockito.given(fileStorageFacade.download(any(UUID.class), eq(FileType.PHOTO_PERSON)))
+                    .willThrow(new BPException.ServiceUnavailable("error"));
+
+            mockMvc.perform(get(urlEndpoint() + "/" + personId + "/photo"))
+                    .andDo(print())
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(header().stringValues("detail", "error"));;
         }
 
     }
@@ -1187,17 +1237,34 @@ public class PersonControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link PersonController#uploadPhoto(MultipartFile)} should return bad request if photo not upload.
-         * Test try to upload photo and then check status code 400.
+         * {@link PersonController#uploadPhoto(MultipartFile)} should return service unavailable if photo not upload.
+         * Test try to upload photo and then check status code 503 with detailed error message in header.
          */
         @Test
-        public void upload_photo_should_return_bad_request_if_photo_not_upload_test() throws Exception {
-            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_PERSON))).willReturn(new UploadResponse(null, "Some error"));
+        public void upload_photo_should_return_service_unavailable_if_photo_not_upload_test() throws Exception {
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_PERSON))).willReturn(new UploadResponse(null, "error"));
 
             mockMvc.perform(MockMvcRequestBuilders.multipart(urlEndpoint() + "/photo")
                             .file("attachment", getPhoto(PATH_TO_JPEG_FILE)))
                     .andDo(print())
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(header().stringValues("detail", "Upload photo error: error"));
+        }
+
+        /**
+         * {@link PersonController#uploadPhoto(MultipartFile)} should return service unavailable if error acquire.
+         * Test try to upload photo and then check status code 503 with detailed error message in header.
+         */
+        @Test
+        public void upload_photo_should_return_service_unavailable_if_error_acquire_upload_test() throws Exception {
+            BDDMockito.given(fileStorageFacade.upload(any(), eq(FileType.PHOTO_PERSON)))
+                    .willThrow(new BPException.ServiceUnavailable("error"));
+
+            mockMvc.perform(MockMvcRequestBuilders.multipart(urlEndpoint() + "/photo")
+                            .file("attachment", getPhoto(PATH_TO_JPEG_FILE)))
+                    .andDo(print())
+                    .andExpect(status().isServiceUnavailable())
+                    .andExpect(header().stringValues("detail", "error"));
         }
     }
 }

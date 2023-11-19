@@ -40,7 +40,7 @@ public class RoleService {
      * @throws BPException if role not exists in database
      */
     public Role findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new BPException("Role not found id: " + id));
+        return repository.findById(id).orElseThrow(() -> new BPException.NotFound("Role not found id: " + id));
     }
 
     /**
@@ -98,7 +98,7 @@ public class RoleService {
     public Role save(RoleRequest rq) {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
-                        .orElseThrow(() -> new BPException("Role not found id: " + id))
+                        .orElseThrow(() -> new BPException.NotFound("Role not found id: " + id))
                 ).map(role -> toEntity(role, rq))
                 .orElseGet(() ->
                         repository.save(toEntity(new Role(), rq))

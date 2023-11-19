@@ -40,7 +40,7 @@ public class LabelService {
      * @throws BPException if label not exists in database
      */
     public Label findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new BPException("Label not found id: " + id));
+        return repository.findById(id).orElseThrow(() -> new BPException.NotFound("Label not found id: " + id));
     }
 
     /**
@@ -98,7 +98,7 @@ public class LabelService {
     public Label save(LabelRequest rq) {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
-                        .orElseThrow(() -> new BPException("Label not found id: " + id))
+                        .orElseThrow(() -> new BPException.NotFound("Label not found id: " + id))
                 ).map(label -> toEntity(label, rq))
                 .orElseGet(() ->
                         repository.save(toEntity(new Label(), rq))

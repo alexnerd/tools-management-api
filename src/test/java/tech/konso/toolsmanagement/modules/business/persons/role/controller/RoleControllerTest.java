@@ -88,17 +88,17 @@ public class RoleControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link RoleController#find(Long)} should return bad request if {@link Role} with id not exist in database.
+         * {@link RoleController#find(Long)} should return not found if {@link Role} with id not exist in database.
          * Test try to find role whit id = -1 (negative number guaranties, that no such id exists in database)
-         * and check if controller return bad request with detailed error message in header.
+         * and check if controller return not found with detailed error message in header.
          */
         @Test
-        public void find_should_return_bad_request_test() throws Exception {
+        public void find_should_return_not_found_test() throws Exception {
             long roleId = -1L;
 
             mockMvc.perform(get(urlEndpoint() + "/" + roleId))
                     .andDo(print())
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isNotFound())
                     .andExpect(header().stringValues("detail", "Role not found id: " + roleId));
         }
     }
@@ -499,12 +499,12 @@ public class RoleControllerTest extends AbstractControllerTest {
         }
 
         /**
-         * {@link RoleController#update(RoleRequest)} should return bad request if role with searching id not exist in database.
+         * {@link RoleController#update(RoleRequest)} should return not found if role with searching id not exist in database.
          * Test send request for update by not existing id.
-         * Then checks if controller response with bad request.
+         * Then checks if controller response with not found.
          */
         @Test
-        public void update_should_return_bad_request_for_not_existing_id_test() throws Exception {
+        public void update_should_return_not_found_for_not_existing_id_test() throws Exception {
             RoleRequest rq = getDefaultRoleRequest()
                     .id(-1L)
                     .name("test")
@@ -513,7 +513,7 @@ public class RoleControllerTest extends AbstractControllerTest {
             mockMvc.perform(put(urlEndpoint())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(rq)))
-                    .andExpect(status().isBadRequest());
+                    .andExpect(status().isNotFound());
         }
     }
 
