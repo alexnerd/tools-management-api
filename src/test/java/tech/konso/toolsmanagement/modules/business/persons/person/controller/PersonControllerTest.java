@@ -1083,7 +1083,7 @@ public class PersonControllerTest extends AbstractControllerTest {
         @Test
         public void save_should_not_save_if_is_unregistered_null_test() throws Exception {
             PersonRequest rq = getDefaultPersonRequest()
-                    .isArchived(null)
+                    .isUnregistered(null)
                     .build();
 
             mockMvc.perform(post(urlEndpoint())
