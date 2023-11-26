@@ -1,0 +1,17 @@
+package tech.konso.toolsmanagement.modules.business.stocks.stock.persistence.repository;
+
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+import tech.konso.toolsmanagement.modules.business.stocks.stock.persistence.dao.Stock;
+
+/**
+ * Repository for stock entity.
+ * <p>Supports CRUD operations, searching by specification and pageable format.
+ * <p>By default, uses read only transactions, if you want another mode, you must directly specify it on your method.
+ */
+@Repository
+@Transactional(readOnly = true)
+public interface StockRepository extends CrudRepository<Stock, Long>, JpaSpecificationExecutor<Stock> {
+}
