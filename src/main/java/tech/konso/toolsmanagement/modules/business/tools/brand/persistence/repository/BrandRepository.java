@@ -18,8 +18,4 @@ import tech.konso.toolsmanagement.modules.business.tools.brand.persistence.dao.B
 @Transactional(readOnly = true)
 public interface BrandRepository extends JpaRepository<Brand, Long> {
     Page<Brand> findAll(@Nullable Specification<Brand> spec, Pageable pageable);
-
-    interface SimpleBrand{
-        String getName();
-    }
 }
