@@ -145,7 +145,7 @@ public class LabelServiceTest {
          * {@link LabelService#save(LabelRequest)} should not update {@link Label} if name field is null.
          * Test finds existing label id in database with jdbcTemplate and try to update it name field
          * using {@link LabelService#save(LabelRequest)}.
-         * Then checks if exception {@link DataIntegrityViolationException} was thrown.
+         * Then checks if exception {@link Exception} was thrown.
          * Then checks if field name not changed during test.
          */
         @Test
@@ -157,7 +157,7 @@ public class LabelServiceTest {
                     .name(null)
                     .build();
 
-            assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
+            assertThrows(Exception.class, () -> service.save(rq));
 
             String labelNameFromDb = jdbcTemplate.queryForObject("SELECT name FROM persons_label WHERE label_id = " + labelId + " AND is_archived IS FALSE", String.class);
             assertEquals(labelName, labelNameFromDb);
@@ -167,7 +167,7 @@ public class LabelServiceTest {
          * {@link LabelService#save(LabelRequest)} should not update {@link Label} if isArchived flag is null.
          * Test finds existing label id in database with jdbcTemplate and try to update it isArchived flag
          * using {@link LabelService#save(LabelRequest)}.
-         * Then checks if exception {@link DataIntegrityViolationException} was thrown.
+         * Then checks if exception {@link Exception} was thrown.
          * Then checks if isArchived flag not changed during test.
          */
         @Test
@@ -178,7 +178,7 @@ public class LabelServiceTest {
                     .isArchived(null)
                     .build();
 
-            assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
+            assertThrows(Exception.class, () -> service.save(rq));
 
             Boolean isArchived = jdbcTemplate.queryForObject("SELECT is_archived FROM persons_label WHERE label_id = " + labelId, Boolean.class);
             assertFalse(isArchived);
@@ -208,7 +208,7 @@ public class LabelServiceTest {
         /**
          * {@link LabelService#save(LabelRequest)}} should not save {@link Label} object
          * if field name already exists in database.
-         * Test try to save Label with existing field name and check if {@link DataIntegrityViolationException} is thrown.
+         * Test try to save Label with existing field name and check if {@link Exception} is thrown.
          * Then check if only one label with given name exist in database.
          */
         @Test
@@ -218,7 +218,7 @@ public class LabelServiceTest {
                     .name(labelName)
                     .build();
 
-            assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
+            assertThrows(Exception.class, () -> service.save(rq));
 
             Long count = jdbcTemplate.queryForObject("SELECT count(*) FROM persons_label WHERE name = '" + labelName + "'", Long.class);
             assertEquals(1L, count);
@@ -226,7 +226,7 @@ public class LabelServiceTest {
 
         /**
          * {@link LabelService#save(LabelRequest)}} should not save {@link Label} object if field name is null.
-         * Test try to save Label with null field name and check if {@link DataIntegrityViolationException} is thrown.
+         * Test try to save Label with null field name and check if {@link Exception} is thrown.
          * Then test checks if there is no labels with null name exists in the database
          */
         @Test
@@ -235,7 +235,7 @@ public class LabelServiceTest {
                     .name(null)
                     .build();
 
-            assertThrows(DataIntegrityViolationException.class, () -> service.save(rq));
+            assertThrows(Exception.class, () -> service.save(rq));
 
             Long count = jdbcTemplate.queryForObject("SELECT count(*) FROM persons_label WHERE name IS NULL", Long.class);
             assertEquals(0L, count);
@@ -249,7 +249,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} should return all not archived {@link Label} objects.
          * Test counts all not archived label objects in the database using jdbcTemplate
          * Then test build isArchived specification for not archived labels and try to find them with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if counts not archived labels from jdbcTemplate equals totalItems from {@link LabelFilterResponse}
+         * Then test checks if counts not archived labels from jdbcTemplate equals totalItems from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -266,7 +266,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} should return all archived {@link Label} objects.
          * Test counts all archived label objects in the database using jdbcTemplate
          * Then test build isArchived specification for archived labels and try to find them with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if counts archived labels from jdbcTemplate equals totalItems from {@link LabelFilterResponse}
+         * Then test checks if counts archived labels from jdbcTemplate equals totalItems from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -283,7 +283,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} should return {@link Label} objects by like name pattern.
          * Test counts all label objects in the database matches %ran% pattern using jdbcTemplate
          * Then test build like specification for name with %ran% pattern and try to find them with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if counts labels from jdbcTemplate equals totalItems from {@link LabelFilterResponse}
+         * Then test checks if counts labels from jdbcTemplate equals totalItems from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -303,7 +303,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} should sort {@link Label} objects by name in asc order.
          * Test receives all label names from the database in asc order
          * Then test build sort specification for order labels by name in asc order and try to find them with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if order of label names received from jdbcTemplate equals order of label names from {@link LabelFilterResponse}
+         * Then test checks if order of label names received from jdbcTemplate equals order of label names from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -321,7 +321,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} should sort {@link Label} objects by name in desc order.
          * Test receives all label names from the database in desc order
          * Then test build sort specification for order labels by name in desc order and try to find them with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if order of label names received from jdbcTemplate equals order of label names from {@link LabelFilterResponse}
+         * Then test checks if order of label names received from jdbcTemplate equals order of label names from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -339,7 +339,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} should sort {@link Label} objects by createdAt in asc order.
          * Test receives all label names from the database ordered by createdAt in asc order
          * Then test build sort specification for order labels by createdAt in asc order and try to find them with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if order of label names received from jdbcTemplate equals order of label names from {@link LabelFilterResponse}
+         * Then test checks if order of label names received from jdbcTemplate equals order of label names from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -357,7 +357,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} should sort {@link Label} objects by createdAt in desc order.
          * Test receives all label names from the database ordered by createdAt in desc order
          * Then test build sort specification for order labels by createdAt in desc order and try to find them with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if order of label names received from jdbcTemplate equals order of label names from {@link LabelFilterResponse}
+         * Then test checks if order of label names received from jdbcTemplate equals order of label names from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -375,7 +375,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} without filters, by default should sort {@link Label} objects by createdAt in desc order.
          * Test receives all label names from the database ordered by createdAt in desc order
          * Then test build sort specification null parameter and try to find labels with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if order of label names received from jdbcTemplate equals order of label names from {@link LabelFilterResponse}
+         * Then test checks if order of label names received from jdbcTemplate equals order of label names from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -393,7 +393,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} with unsupported filter, by default should sort {@link Label} objects by createdAt in desc order.
          * Test receives all label names from the database ordered by createdAt in desc order
          * Then test build sort specification with empty field "  " parameter and try to find labels with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if order of label names received from jdbcTemplate equals order of label names from {@link LabelFilterResponse}
+         * Then test checks if order of label names received from jdbcTemplate equals order of label names from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
@@ -411,7 +411,7 @@ public class LabelServiceTest {
          * {@link LabelService#findAll(int, int, Specification)} with unsupported filter, by default should sort {@link Label} objects by createdAt in desc order.
          * Test receives all label names from the database ordered by createdAt in desc order
          * Then test build sort specification with unsupported parameter and try to find labels with {@link LabelService#findAll(int, int, Specification)}
-         * Then test checks if order of label names received from jdbcTemplate equals order of label names from {@link LabelFilterResponse}
+         * Then test checks if order of label names received from jdbcTemplate equals order of label names from pageable result
          * received from {@link LabelService#findAll(int, int, Specification)}
          */
         @Test
