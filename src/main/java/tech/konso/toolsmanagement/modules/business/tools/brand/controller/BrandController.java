@@ -71,7 +71,7 @@ public class BrandController {
 
     @Operation(summary = "Update existing brand by id")
     @Parameters({
-            @Parameter(name = "rq", description = "Request body fo update brand", required = true,
+            @Parameter(name = "rq", description = "Request body for update brand", required = true,
                     schema = @Schema(implementation = BrandRequest.class))
     })
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
