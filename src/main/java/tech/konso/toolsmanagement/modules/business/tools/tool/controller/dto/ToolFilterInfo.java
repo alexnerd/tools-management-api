@@ -69,8 +69,8 @@ public record ToolFilterInfo(@Schema(description = "tool id", example = "1")
                              Set<String> labels,
                              @Schema(description = "archived flag", example = "false")
                              Boolean isArchived,
-                             @Schema(description = "create date", example = "false")
+                             @Schema(description = "create date", example = "2023-08-13T18:05:29.179615")
                              LocalDateTime createdAt,
-                             @Schema(description = "update date", example = "false")
+                             @Schema(description = "update date", example = "2023-08-13T18:05:29.179615")
                              LocalDateTime updatedAt) {
 }
