@@ -132,8 +132,8 @@ public class LabelControllerTest extends AbstractControllerTest {
 
             mockMvc.perform(get(urlEndpoint() + tail))
                     .andDo(print())
-                    .andExpect(status().isBadRequest()).
-                    andExpect(header().stringValues("detail", "findAll.size: must be less than or equal to 50"));
+                    .andExpect(status().isBadRequest())
+                    .andExpect(header().stringValues("detail", "findAll.size: must be less than or equal to 50"));
         }
 
         /**
