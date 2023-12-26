@@ -611,7 +611,7 @@ public class ToolControllerTest extends AbstractControllerTest {
          * Test checks if tools with given name not exists in database.
          * Then sends request to create new tool and checks status equals created.
          * Then receive number tools exists in database with new name.
-         * Then cheks if number tools with new name equals one (new tool saved to database).
+         * Then checks if number tools with new name equals one (new tool saved to database).
          */
         @Test
         public void save_should_save_new_tool_test() throws Exception {
