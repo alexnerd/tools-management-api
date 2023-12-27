@@ -65,6 +65,23 @@ public class ToolService {
         return repository.findById(id).map(toolsDtoMapper::mapToToolInfo).orElseThrow(() -> new BPException.NotFound("Tool not found id: " + id));
     }
 
+
+    /**
+     * Get tool reference by unique id. Used to link the tool entity with other entities,
+     * when the entire object from the database should not be loaded
+     * <p>
+     * Example:
+     * <pre>
+     *     Tool tool = getReferenceById(2L);
+     * </pre>
+     *
+     * @param id of tool, must exist in database
+     * @return proxy tool object
+     */
+    public Tool getReference(Long id) {
+        return repository.getReferenceById(id);
+    }
+
     /**
      * Finds tools by tool specification and returns it in pageable format.
      * By default, result set sorts by create date from newer to older and without archived tools.
@@ -122,7 +139,7 @@ public class ToolService {
      * @param multipartFile {@link MultipartFile} photo for save to file storage
      * @return {@link UploadPhotoResponse} object with file id
      */
-    public  UploadPhotoResponse uploadPhoto(MultipartFile multipartFile) {
+    public UploadPhotoResponse uploadPhoto(MultipartFile multipartFile) {
         UploadResponse rs = fileStorageFacade.upload(multipartFile, FileType.PHOTO_TOOL);
         if (rs.error() != null) {
             throw new BPException.ServiceUnavailable("Upload photo error: " + rs.error());
