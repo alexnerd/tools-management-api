@@ -4,7 +4,7 @@ import tech.konso.toolsmanagement.modules.business.tools.label.controller.dto.La
 import tech.konso.toolsmanagement.modules.business.tools.label.persistence.dao.Label;
 
 /**
- * Mapper for tool entity
+ * Mapper for label entity
  */
 
 public class LabelEntityMapper {
