@@ -115,7 +115,7 @@ public class CommentEntityMapperTest {
     @Nested
     class UpdateContentTests {
         /**
-         * {@link CommentEntityMapper#updateContent(Comment, CommentRequest)} should update content.
+         * {@link CommentEntityMapper#updateEntity(Comment, CommentRequest)} should update content.
          * Test creates object {@link CommentRequest} with content and then try to update it in {@link Comment} object.
          * Then checks equality content from comment with content from request.
          */
@@ -123,7 +123,7 @@ public class CommentEntityMapperTest {
         public void update_content_should_update_content() {
             CommentRequest rq = getCommentRequest();
 
-            Comment comment = mapper.updateContent(new Comment(), rq);
+            Comment comment = mapper.updateEntity(new Comment(), rq);
 
             assertEquals(comment.getContent(), rq.content());
         }

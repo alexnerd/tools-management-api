@@ -73,7 +73,7 @@ public class CommentService {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
                         .orElseThrow(() -> new BPException.NotFound("Comment not found id: " + id))
-                ).map(comment -> entityMapper.updateContent(comment, rq))
+                ).map(comment -> entityMapper.updateEntity(comment, rq))
                 .orElseGet(() ->
                         repository.save(entityMapper.toEntity(new Comment(), rq))
                 );
@@ -98,6 +98,6 @@ public class CommentService {
     public Page<CommentFilterInfo> findAll(int page, int size, Specification<Comment> spec) {
         AbstractSpecification.SpecBuilder<Comment> builder = specBuilder(Comment.class);
         Pageable pageable = PageRequest.of(page, size);
-        return repository.findAll(builder.and(spec).build(), pageable).map(dtoMapper::mapToCommentFilterInfo);
+        return repository.findAll(builder.and(spec).build(), pageable).map(dtoMapper::toCommentFilterInfo);
     }
 }
