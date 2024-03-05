@@ -1,5 +1,6 @@
 package tech.konso.toolsmanagement.modules.business.tools.brand.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,8 +12,9 @@ import tech.konso.toolsmanagement.modules.business.tools.brand.controller.dto.Br
 import tech.konso.toolsmanagement.modules.business.tools.brand.persistence.dao.Brand;
 import tech.konso.toolsmanagement.modules.business.tools.brand.persistence.repository.BrandRepository;
 import tech.konso.toolsmanagement.modules.business.tools.brand.persistence.specification.BrandSpecification;
-import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
+import tech.konso.toolsmanagement.modules.business.tools.brand.service.mappers.BrandEntityMapper;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
+import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
 import java.util.Optional;
 
@@ -26,6 +28,13 @@ public class BrandService {
 
     @Autowired
     private BrandRepository repository;
+
+    private BrandEntityMapper entityMapper;
+
+    @PostConstruct
+    public void init() {
+        entityMapper = new BrandEntityMapper();
+    }
 
     /**
      * Find brand in database by unique id. Brand must exist in database
@@ -99,27 +108,9 @@ public class BrandService {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
                         .orElseThrow(() -> new BPException.NotFound("Brand not found id: " + id))
-                ).map(brand -> toEntity(brand, rq))
+                ).map(brand -> entityMapper.toEntity(brand, rq))
                 .orElseGet(() ->
-                        repository.save(toEntity(new Brand(), rq))
+                        repository.save(entityMapper.toEntity(new Brand(), rq))
                 );
-    }
-
-    /**
-     * Converts {@link BrandRequest} to {@link Brand} object.
-     * <p>
-     * Example:
-     * <pre>
-     *     toEntity(new Brand(), rq);
-     * </pre>
-     *
-     * @param brand {@link Brand} object for save to database or update existing
-     * @param rq {@link BrandRequest} object for converting to {@link Brand}
-     * @return {@link Brand} saved object
-     */
-    private Brand toEntity(Brand brand, BrandRequest rq) {
-        brand.setName(rq.name());
-        brand.setIsArchived(rq.isArchived());
-        return brand;
     }
 }
