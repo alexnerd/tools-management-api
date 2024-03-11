@@ -1,5 +1,6 @@
 package tech.konso.toolsmanagement.modules.business.persons.role.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,7 @@ import tech.konso.toolsmanagement.modules.business.persons.role.controller.dto.R
 import tech.konso.toolsmanagement.modules.business.persons.role.persistence.dao.Role;
 import tech.konso.toolsmanagement.modules.business.persons.role.persistence.repository.RoleRepository;
 import tech.konso.toolsmanagement.modules.business.persons.role.persistence.specification.RoleSpecification;
+import tech.konso.toolsmanagement.modules.business.persons.role.service.mappers.RoleEntityMapper;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
@@ -26,6 +28,13 @@ public class RoleService {
 
     @Autowired
     private RoleRepository repository;
+
+    private RoleEntityMapper entityMapper;
+
+    @PostConstruct
+    public void init() {
+        entityMapper = new RoleEntityMapper();
+    }
 
     /**
      * Find role in database by unique id. Role must exist in database
@@ -99,27 +108,9 @@ public class RoleService {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
                         .orElseThrow(() -> new BPException.NotFound("Role not found id: " + id))
-                ).map(role -> toEntity(role, rq))
+                ).map(role -> entityMapper.toEntity(role, rq))
                 .orElseGet(() ->
-                        repository.save(toEntity(new Role(), rq))
+                        repository.save(entityMapper.toEntity(new Role(), rq))
                 );
-    }
-
-    /**
-     * Converts {@link RoleRequest} to {@link Role} object.
-     * <p>
-     * Example:
-     * <pre>
-     *     toEntity(new Role(), rq);
-     * </pre>
-     *
-     * @param role {@link Role} object for save to database or update existing
-     * @param rq {@link RoleRequest} object for converting to {@link Role}
-     * @return {@link Role} saved object
-     */
-    private Role toEntity(Role role, RoleRequest rq) {
-        role.setName(rq.name());
-        role.setIsArchived(rq.isArchived());
-        return role;
     }
 }
