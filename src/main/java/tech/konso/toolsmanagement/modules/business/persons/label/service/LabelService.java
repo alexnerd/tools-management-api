@@ -1,5 +1,6 @@
 package tech.konso.toolsmanagement.modules.business.persons.label.service;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,7 @@ import tech.konso.toolsmanagement.modules.business.persons.label.controller.dto.
 import tech.konso.toolsmanagement.modules.business.persons.label.persistence.dao.Label;
 import tech.konso.toolsmanagement.modules.business.persons.label.persistence.repository.LabelRepository;
 import tech.konso.toolsmanagement.modules.business.persons.label.persistence.specification.LabelSpecification;
+import tech.konso.toolsmanagement.modules.business.persons.label.service.mappers.LabelEntityMapper;
 import tech.konso.toolsmanagement.system.commons.exceptions.BPException;
 import tech.konso.toolsmanagement.system.commons.specification.AbstractSpecification;
 
@@ -26,6 +28,14 @@ public class LabelService {
 
     @Autowired
     private LabelRepository repository;
+
+    private LabelEntityMapper entityMapper;
+
+
+    @PostConstruct
+    public void init () {
+        entityMapper = new LabelEntityMapper();
+    }
 
     /**
      * Find label in database by unique id. Label must exist in database
@@ -99,27 +109,9 @@ public class LabelService {
         return Optional.ofNullable(rq.id())
                 .map(id -> repository.findById(rq.id())
                         .orElseThrow(() -> new BPException.NotFound("Label not found id: " + id))
-                ).map(label -> toEntity(label, rq))
+                ).map(label -> entityMapper.toEntity(label, rq))
                 .orElseGet(() ->
-                        repository.save(toEntity(new Label(), rq))
+                        repository.save(entityMapper.toEntity(new Label(), rq))
                 );
-    }
-
-    /**
-     * Converts {@link LabelRequest} to {@link Label} object.
-     * <p>
-     * Example:
-     * <pre>
-     *     toEntity(new Label(), rq);
-     * </pre>
-     *
-     * @param label {@link Label} object for save to database or update existing
-     * @param rq {@link LabelRequest} object for converting to {@link Label}
-     * @return {@link Label} saved object
-     */
-    private Label toEntity(Label label, LabelRequest rq) {
-        label.setName(rq.name());
-        label.setIsArchived(rq.isArchived());
-        return label;
     }
 }
